@@ -1,0 +1,22 @@
+# Node.js specific ignores
+node_modules/
+npm-debug.log
+.env
+.DS_Store
+
+# Git ignores
+.git
+.gitignore
+
+# Docker ignores
+Dockerfile
+.dockerignore
+
+# Logs
+logs/
+*.log
+
+# Editor/OS specific files
+.vscode/
+.idea/
+Thumbs.db
