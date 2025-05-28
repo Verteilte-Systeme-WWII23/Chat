@@ -2,53 +2,52 @@ const express = require("express");
 const http = require("http");
 const WebSocket = require("ws");
 const { v4: uuidv4 } = require("uuid");
+const { getAIResponse } = require("./ai"); // Angenommen, du hast eine AI-Service-Funktion
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const users = new Map(); // userId => { ws, name }
-const chats = new Map(); // chatId => { id, participants: [name1, name2], createdAt }
+const users = new Map();
+users.set("AI", null); // userId => { ws, name }
+const chats = new Map(); // chatId => { id, participants: [userid, userid], createdAt }
 const messages = new Map(); // chatId => [{id, from, text, timestamp}, ...]
 
-// Hilfsfunktion: Chat zwischen zwei Personen finden oder erstellen
-function findOrCreateChat(user1, user2) {
-  // Ensure consistent participant order
-  const participantsSorted = [user1, user2].sort();
-  const p1 = participantsSorted[0];
-  const p2 = participantsSorted[1];
+// Hilfsfunktion: Chat für beliebige Teilnehmer finden oder erstellen
+function findOrCreateChat(participantIds) {
+  // Teilnehmer sortieren für Konsistenz
+  const participantsSorted = [...participantIds].sort();
 
-  // Suche nach existierendem Chat zwischen den beiden
+  // Suche nach existierendem Chat mit exakt diesen Teilnehmern
   for (const [chatId, chat] of chats.entries()) {
-    // Check if participants match exactly and in the sorted order
     if (
-      chat.participants[0] === p1 &&
-      chat.participants[1] === p2 &&
-      chat.participants.length === 2
+      chat.participants.length === participantsSorted.length &&
+      chat.participants.every((id, idx) => id === participantsSorted[idx])
     ) {
       return chatId;
     }
   }
 
-  // Erstelle neuen Chat
+  // Neuen Chat erstellen
   const chatId = uuidv4();
   chats.set(chatId, {
     id: chatId,
-    participants: participantsSorted, // Store sorted participants
+    participants: participantsSorted,
     createdAt: new Date().toISOString(),
   });
-  messages.set(chatId, []); // Leere Nachrichtenliste für neuen Chat
-
-  console.log(`Neuer Chat erstellt: ${chatId} zwischen ${p1} und ${p2}`);
+  messages.set(chatId, []);
+  console.log(
+    `Neuer Gruppenchat erstellt: ${chatId} mit ${participantsSorted.join(", ")}`
+  );
   return chatId;
 }
 
-// Hilfsfunktion: Nachricht zu Chat hinzufügen
-function addMessageToChat(chatId, from, text) {
+// Nachricht zu Chat hinzufügen
+function addMessageToChat(chatId, fromUserId, text) {
   const messageId = uuidv4();
   const message = {
     id: messageId,
-    from: from,
+    from: fromUserId,
     text: text,
     timestamp: new Date().toISOString(),
   };
@@ -61,10 +60,10 @@ function addMessageToChat(chatId, from, text) {
   return message;
 }
 
-// Hilfsfunktion: Chat-Verlauf abrufen
+// Chat-Verlauf abrufen
 function getChatHistory(chatId, limit = 50) {
   const chatMessages = messages.get(chatId) || [];
-  return chatMessages.slice(-limit); // Letzte X Nachrichten
+  return chatMessages.slice(-limit);
 }
 
 wss.on("connection", (ws) => {
@@ -74,7 +73,9 @@ wss.on("connection", (ws) => {
 
   ws.send(JSON.stringify({ type: "welcome", userId }));
 
-  ws.on("message", (msg) => {
+  findOrCreateChat([userId, "AI"]); // Erstelle Chat für den neuen User
+
+  ws.on("message", async (msg) => {
     try {
       const data = JSON.parse(msg);
 
@@ -84,72 +85,102 @@ wss.on("connection", (ws) => {
         console.log(`User ${userId} hat sich in "${data.name}" umbenannt`);
       }
 
+      // Für Gruppen: data.to ist jetzt ein Array von User-IDs (inkl. Sender!)
       if (data.type === "messageTo") {
         const sender = users.get(userId);
-        const recipient = [...users.values()].find((u) => u.name === data.to);
-        const chatId = findOrCreateChat(sender.name, data.to);
+        const participantIds = Array.isArray(data.to) ? data.to : [data.to];
+        // Sender hinzufügen, falls nicht enthalten
+        if (!participantIds.includes(userId)) participantIds.push(userId);
+
+        // Prüfe, ob alle Empfänger existieren
+        const allExist = participantIds.every((id) => users.has(id));
+        if (!allExist) return;
+
+        const chatId = findOrCreateChat(participantIds);
 
         // Nachricht speichern
-        const message = addMessageToChat(chatId, sender.name, data.text);
-        if (recipient && recipient.ws.readyState === WebSocket.OPEN && sender) {
-          // Chat finden oder erstellen
+        const message = addMessageToChat(chatId, userId, data.text);
 
-          // Nachricht an Empfänger senden
-          recipient.ws.send(
-            JSON.stringify({
-              type: "message",
-              chatId: chatId,
-              messageId: message.id,
-              from: sender.name,
-              text: data.text,
-              timestamp: message.timestamp,
-            })
-          );
-
-          // Bestätigung an Sender
-          sender.ws.send(
-            JSON.stringify({
-              type: "messageSent",
-              chatId: chatId,
-              messageId: message.id,
-              to: data.to,
-              text: data.text,
-              timestamp: message.timestamp,
-            })
-          );
-
-          console.log(
-            `Nachricht in Chat ${chatId} gespeichert: ${sender.name} -> ${data.to}`
-          );
+        // Nachricht an alle Teilnehmer senden
+        for (const pid of participantIds) {
+          const user = users.get(pid);
+          if (user && user.ws.readyState === WebSocket.OPEN) {
+            user.ws.send(
+              JSON.stringify({
+                type: "message",
+                chatId: chatId,
+                messageId: message.id,
+                from: userId,
+                text: data.text,
+                timestamp: message.timestamp,
+              })
+            );
+          }
         }
+        // Log-Ausgabe für Debuggin
+        console.log(
+          `Nachricht in Chat ${chatId} gespeichert: ${userId} -> [${participantIds.join(
+            ", "
+          )}]`
+        );
+
+        if(participantIds.includes("AI")) {
+          // Simuliere AI-Antwort
+          const response = await getAIResponse(data.text);
+            const aiMessage = addMessageToChat(chatId, "AI", response);
+            for (const pid of participantIds) {
+              const user = users.get(pid);
+              if (user && user.ws.readyState === WebSocket.OPEN) {
+                user.ws.send(
+                  JSON.stringify({
+                    type: "message",
+                    chatId: chatId,
+                    messageId: aiMessage.id,
+                    from: "AI",
+                    text: aiMessage.text,
+                    timestamp: aiMessage.timestamp,
+                  })
+                );
+              }
+            }// Verzögerung für AI-Antwort
+        }
+
+
+
       }
 
-      // Neuer Nachrichtentyp: Chat-Verlauf abrufen
+
+
+      // Chat-Verlauf abrufen (data.participants ist ein Array von User-IDs)
       if (data.type === "getChatHistory") {
         const sender = users.get(userId);
-        if (sender && data.withUser) {
-          const chatId = findOrCreateChat(sender.name, data.withUser);
+        if (sender && Array.isArray(data.participants)) {
+          // Sender hinzufügen, falls nicht enthalten
+          const participantIds = [...data.participants];
+          if (!participantIds.includes(userId)) participantIds.push(userId);
+
+          const chatId = findOrCreateChat(participantIds);
           const history = getChatHistory(chatId);
 
           sender.ws.send(
             JSON.stringify({
               type: "chatHistory",
               chatId: chatId,
-              withUser: data.withUser,
+              participants: participantIds,
               messages: history,
             })
           );
         }
       }
 
-      // Neuer Nachrichtentyp: Alle Chats eines Users abrufen
+      // Alle Chats eines Users abrufen bleibt unverändert
       if (data.type === "getMyChats") {
         const sender = users.get(userId);
         if (sender) {
           const userChats = [];
 
           for (const [chatId, chat] of chats.entries()) {
-            if (chat.participants.includes(sender.name)) {
+            if (chat.participants.includes(userId)) {
               const chatMessages = messages.get(chatId) || [];
               const lastMessage = chatMessages[chatMessages.length - 1];
 
