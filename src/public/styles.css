@@ -1,0 +1,99 @@
+:root {
+  --primary: #3498db;
+  --primary-dark: #2980b9;
+  --accent: #e74c3c;
+  --light: #ecf0f1;
+  --dark: #34495e;
+  --shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+main {
+  text-align: center;
+  padding: 2.5rem;
+  border-radius: 1rem;
+  background-color: white;
+  box-shadow: var(--shadow);
+  max-width: 90%;
+  width: 600px;
+}
+
+h1 {
+  color: var(--dark);
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+h1::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background-color: var(--primary);
+  border-radius: 3px;
+}
+
+p {
+  color: #7f8c8d;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+button {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow);
+  position: relative;
+}
+
+button:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button::after {
+  content: "💬";
+  margin-left: 8px;
+}
+
+footer {
+  margin-top: 3rem;
+  color: #95a5a6;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  main {
+    width: 90%;
+    padding: 1.5rem;
+  }
+}
