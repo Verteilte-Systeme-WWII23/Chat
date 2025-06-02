@@ -1,26 +1,18 @@
 import { v4 as uuidv4 } from "uuid";
 
+// userManager.js
 const users = new Map(); // userId => { ws, name, ip }
 const ipToUserId = new Map(); // ip => userId
 users.set("AI", null);
 
 export function addUser(ws, ip) {
-  let userId = ipToUserId.get(ip);
-  if (userId && users.has(userId)) {
-    // Reconnect: Update ws
-    users.get(userId).ws = ws;
-    return userId;
-  }
-  // Neuer User
-  userId = uuidv4();
-  // Eindeutiger Name
+  // Erzeuge immer eine neue userId, wenn keine mitgegeben wird
+  const userId = uuidv4();
   let name = `Gast_${userId.slice(0, 4)}`;
-  // Stelle sicher, dass der Name systemweit eindeutig ist
   while ([...users.values()].some(u => u && u.name === name)) {
     name = `Gast_${uuidv4().slice(0, 4)}`;
   }
   users.set(userId, { ws, name, ip });
-  ipToUserId.set(ip, userId);
   return userId;
 }
 
