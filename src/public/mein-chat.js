@@ -191,15 +191,36 @@ class MeinChat extends HTMLElement {
   }
 
   initSocket() {
+    // userId aus LocalStorage holen, bevor die Verbindung aufgebaut wird!
+    this.myId = localStorage.getItem("chatUserId") || "";
     this.socket = new WebSocket(`ws://${location.host}`);
+
     this.socket.onopen = () => {
-      // Verbunden
+      if (this.myId) {
+        this.socket.send(JSON.stringify({ type: "reconnect", userId: this.myId }));
+      }
     };
+
     this.socket.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
       if (data.type === "welcome") {
         this.myId = data.userId;
+        this.myName = data.name || ""; // <-- Name vom Server übernehmen!
+        localStorage.setItem("chatUserId", this.myId);
+
+        // Zeige den Namen im UI
+        this.shadowRoot.getElementById("user-name").textContent = this.myName || "Mein Name";
+
+        // Loginmaske nur anzeigen, wenn noch Gastname
+        if (!this.myName || this.myName.startsWith("Gast_")) {
+          this.shadowRoot.getElementById("login-screen").style.display = "block";
+          this.shadowRoot.getElementById("main-container").style.display = "none";
+        } else {
+          this.shadowRoot.getElementById("login-screen").style.display = "none";
+          this.shadowRoot.getElementById("main-container").style.display = "flex";
+          this.loadMyChats();
+        }
       }
 
       if (data.type === "message") {
@@ -226,6 +247,18 @@ class MeinChat extends HTMLElement {
       if (data.type === "chatHistory") {
         this.currentChatId = data.chatId;
         this.currentParticipants = data.participants;
+
+        // Namen im Chat-Objekt speichern
+        if (data.names) {
+          let chat = this.myChats.find(c => c.chatId === data.chatId);
+          if (!chat) {
+            chat = { chatId: data.chatId, participants: data.participants, names: data.names };
+            this.myChats.push(chat);
+          } else {
+            chat.names = { ...chat.names, ...data.names };
+          }
+        }
+
         this.displayChatHistory(data.messages);
         this.updateChatHeader(data.participants);
       }
@@ -244,6 +277,7 @@ class MeinChat extends HTMLElement {
     this.shadowRoot.getElementById("login-screen").style.display = "none";
     this.shadowRoot.getElementById("main-container").style.display = "flex";
 
+    // Nach Login: Chats laden
     this.loadMyChats();
   }
 
@@ -255,9 +289,10 @@ class MeinChat extends HTMLElement {
     const chatList = this.shadowRoot.getElementById("chat-list");
     chatList.innerHTML = "";
     this.myChats.forEach((chat) => {
+      // Namen der anderen Teilnehmer holen
       const otherNames = chat.participants
         .filter((id) => id !== this.myId)
-        .map((id) => this.getUserName(id, chat.participants))
+        .map((id) => (chat.names && chat.names[id]) ? chat.names[id] : id)
         .join(", ");
       const chatItem = document.createElement("div");
       chatItem.className = "chat-item";
@@ -266,8 +301,7 @@ class MeinChat extends HTMLElement {
       const lastMessageText = chat.lastMessage
         ? (chat.lastMessage.from === this.myId
             ? "Du: "
-            : this.getUserName(chat.lastMessage.from, chat.participants) +
-              ": ") + chat.lastMessage.text
+            : ((chat.names && chat.names[chat.lastMessage.from]) ? chat.names[chat.lastMessage.from] : chat.lastMessage.from) + ": ") + chat.lastMessage.text
         : "Noch keine Nachrichten";
 
       const lastMessageTime = chat.lastMessage
@@ -281,11 +315,9 @@ class MeinChat extends HTMLElement {
 
       chatItem.innerHTML = `
         <h4 style="${isUnread ? "font-weight: bold;" : ""}">${otherNames}</h4>
-        <p style="${
-          isUnread ? "font-weight: bold; color: #333;" : ""
-        }">${lastMessageText} ${
-        lastMessageTime ? "• " + lastMessageTime : ""
-      }</p>
+        <p style="${isUnread ? "font-weight: bold; color: #333;" : ""}">
+          ${lastMessageText} ${lastMessageTime ? "• " + lastMessageTime : ""}
+        </p>
       `;
 
       if (this.currentChatId === chat.chatId) {
@@ -299,29 +331,36 @@ class MeinChat extends HTMLElement {
   getUserName(userId, participants) {
     if (userId === this.myId) return this.myName;
     if (userId === "AI") return "KI-Assistent";
-    for (const chat of this.myChats) {
-      for (const pid of chat.participants) {
-        if (pid === userId && chat.names && chat.names[pid]) {
-          return chat.names[pid];
-        }
-      }
+    // Suche Namen im aktuellen Chat
+    let chat = this.myChats.find(c => c.chatId === this.currentChatId);
+    if (chat && chat.names && chat.names[userId]) return chat.names[userId];
+    // Fallback: Suche in allen Chats
+    for (const c of this.myChats) {
+      if (c.names && c.names[userId]) return c.names[userId];
     }
     return userId;
   }
 
   startNewChat() {
-    const userIdsRaw = this.shadowRoot.getElementById("new-chat-input").value.trim();
-    if (!userIdsRaw)
-      return alert("Bitte gib mindestens eine User-ID ein (Komma getrennt für Gruppen)");
-    const userIds = userIdsRaw
+    const namesRaw = this.shadowRoot.getElementById("new-chat-input").value.trim();
+    if (!namesRaw)
+      return alert("Bitte gib mindestens einen Namen ein (Komma getrennt für Gruppen)");
+    const names = namesRaw
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    if (!userIds.length) return alert("Ungültige Eingabe");
-    if (!userIds.includes(this.myId)) userIds.push(this.myId);
+    if (!names.length) return alert("Ungültige Eingabe");
+    if (!names.includes(this.myName)) names.push(this.myName);
 
     this.shadowRoot.getElementById("new-chat-input").value = "";
-    this.openChat({ participants: userIds });
+
+    // Sende die Namen an den Server
+    this.socket.send(
+      JSON.stringify({
+        type: "getChatHistoryByNames",
+        names: names,
+      })
+    );
   }
 
   openChat(chat) {
@@ -338,17 +377,14 @@ class MeinChat extends HTMLElement {
       })
     );
 
-    this.shadowRoot.querySelectorAll(".chat-item").forEach((item) => {
-      item.classList.remove("active");
-      if (
-        item.textContent.includes(
-          chat.participants.filter((id) => id !== this.myId).join(", ")
-        )
-      ) {
+    this.shadowRoot.querySelectorAll(".chat-item").forEach((item, idx) => {
+      if (this.myChats[idx] && this.myChats[idx].chatId === chat.chatId) {
         item.classList.add("active");
+      } else {
+        item.classList.remove("active");
       }
     });
-    
+
     // Eingabefeld immer anzeigen, auch wenn keine Nachrichten da sind
     this.shadowRoot.getElementById("message-input-area").style.display = "flex";
   }
