@@ -1,5 +1,6 @@
 import {
   addUser,
+  isBanned,
   removeUser,
   setUserName,
   getUser,
@@ -14,9 +15,15 @@ import {
 } from "./chatManager.js";
 import { getAIResponse } from "./ai.js";
 
-export function handleConnection(ws) {
-  const userId = addUser(ws);
-  ws.send(JSON.stringify({ type: "welcome", userId }));
+export function handleConnection(ws, req) {
+  const ip = req.headers["x-forwarded-for"]?.split(",")[0] || req.socket.remoteAddress;
+  // Bann prüfen
+  if (isBanned(ip)) {
+    ws.close();
+    return;
+  }
+  const userId = addUser(ws, ip);
+  ws.send(JSON.stringify({ type: "welcome", userId, name: getUser(userId)?.name }));
   findOrCreateChat([userId, "AI"]);
 
   ws.on("message", async (msg) => {
@@ -30,7 +37,6 @@ export function handleConnection(ws) {
       if (data.type === "messageTo") {
         const participantIds = Array.isArray(data.to) ? data.to : [data.to];
         if (!participantIds.includes(userId)) participantIds.push(userId);
-        if (!participantIds.every(hasUser)) return;
 
         const chatId = findOrCreateChat(participantIds);
         const message = addMessageToChat(chatId, userId, data.text);

@@ -83,7 +83,20 @@
 
         if (data.type === "welcome") {
           myId = data.userId;
-          console.log("Meine ID:", myId);
+          myName = data.name || "";
+          userNameDisplay.textContent = myName || "Mein Name";
+
+          // Prüfe, ob der Name noch ein Gast-Name ist
+          if (!myName || myName.startsWith("Gast_")) {
+            // Name fehlt oder ist noch ein Gast-Name: Login-Screen anzeigen
+            loginScreen.classList.remove("hidden");
+            mainContainer.classList.add("hidden");
+          } else {
+            // Benutzername ist gesetzt: Direkt ins Haupt-UI
+            loginScreen.classList.add("hidden");
+            mainContainer.classList.remove("hidden");
+            loadMyChats();
+          }
         }
 
         if (data.type === "message") {
@@ -294,7 +307,8 @@
         const messageInput = document.getElementById("message-input");
         const text = messageInput.value.trim();
 
-        if (!text || !currentParticipants.length) return;
+        // Blockiere das Senden, wenn der Chat noch nicht geladen ist
+        if (!text || !currentParticipants.length || !currentChatId) return;
 
         socket.send(
           JSON.stringify({
@@ -304,7 +318,6 @@
           })
         );
 
-        // Entfernt: displayMessage(myId, text, new Date().toISOString(), true);
         messageInput.value = "";
       }
 
