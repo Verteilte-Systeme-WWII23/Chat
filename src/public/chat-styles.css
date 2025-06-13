@@ -39,7 +39,7 @@
     bottom: 24px;
     right: 24px;
     z-index: 9999;
-    width: 350px;
+    width: 500px; /* etwas breiter für Split */
     height: 500px;
     border-radius: var(--radius);
     box-shadow: var(--shadow);
@@ -58,9 +58,30 @@
   #main-container {
     display: none;
     flex: 1;
-    flex-direction: column;
     height: 100%;
     overflow: hidden;
+    flex-direction: row; /* NEU: horizontal split */
+  }
+
+  #sidebar {
+    width: 200px;
+    min-width: 160px;
+    max-width: 260px;
+    background: #f6f7fa;
+    border-right: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  #chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: white;
   }
 
   #chat-messages {
@@ -74,8 +95,10 @@
 
   #chat-list {
     overflow-y: auto;
-    max-height: 120px;
-    border-bottom: 1px solid #eee;
+    flex: 1;
+    border-bottom: none;
+    background: #f6f7fa;
+    padding-bottom: 8px;
   }
 
   #resize-handle {
@@ -164,33 +187,53 @@
 
   
   #user-name {
-    padding: 8px 16px;
-    font-weight: 500;
+    padding: 14px 18px;
+    font-weight: 600;
     color: var(--primary);
     border-bottom: 1px solid #eee;
+    background: #fff;
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
   }
 
   
   .chat-controls {
     display: flex;
-    padding: 8px;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 12px 10px 12px;
     border-bottom: 1px solid #eee;
+    background: #f6f7fa;
   }
 
-  #new-chat-input {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    font-size: 0.9rem;
-  }
-
-  #new-chat-btn {
-    margin-left: 8px;
-    padding: 8px 12px;
+  #new-empty-chat-btn,
+  #join-chat-btn {
+    width: 100%;
+    padding: 9px 0;
     background: var(--primary);
     color: white;
-    border-radius: 20px;
+    border-radius: 8px;
+    font-size: 0.98rem;
+    font-weight: 500;
+    margin-bottom: 0;
+    transition: background 0.2s;
+    border: none;
+  }
+
+  #new-empty-chat-btn:hover,
+  #join-chat-btn:hover {
+    background: var(--primary-dark);
+  }
+
+  #join-chat-id-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+    background: #fff;
+    box-sizing: border-box;
   }
 
   

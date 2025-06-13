@@ -59,6 +59,9 @@ class MeinChat extends HTMLElement {
     const mainContainer = document.createElement('section');
     mainContainer.id = 'main-container';
 
+    const sidebar = document.createElement('div');
+    sidebar.id = 'sidebar';
+
     const userName = document.createElement('div');
     userName.id = 'user-name';
 
@@ -73,6 +76,13 @@ class MeinChat extends HTMLElement {
     const chatList = document.createElement('div');
     chatList.id = 'chat-list';
 
+    sidebar.appendChild(userName);
+    sidebar.appendChild(chatControls);
+    sidebar.appendChild(chatList);
+
+    const chatArea = document.createElement('div');
+    chatArea.id = 'chat-area';
+
     const chatHeader = document.createElement('div');
     chatHeader.id = 'chat-header';
 
@@ -86,15 +96,15 @@ class MeinChat extends HTMLElement {
       <button id="send-btn"></button>
     `;
 
+    chatArea.appendChild(chatHeader);
+    chatArea.appendChild(chatMessages);
+    chatArea.appendChild(messageInputArea);
+
+    mainContainer.appendChild(sidebar);
+    mainContainer.appendChild(chatArea);
+
     const resizeHandle = document.createElement('div');
     resizeHandle.id = 'resize-handle';
-
-    mainContainer.appendChild(userName);
-    mainContainer.appendChild(chatControls);
-    mainContainer.appendChild(chatList);
-    mainContainer.appendChild(chatHeader);
-    mainContainer.appendChild(chatMessages);
-    mainContainer.appendChild(messageInputArea);
 
     container.appendChild(header);
     container.appendChild(loginScreen);
@@ -102,7 +112,6 @@ class MeinChat extends HTMLElement {
     container.appendChild(resizeHandle);
 
     this.shadowRoot.appendChild(container);
-    
 
     if (!this.isOpen) this.style.display = "none";
     else this.style.display = "block";
