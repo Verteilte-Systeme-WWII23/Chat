@@ -1,7 +1,5 @@
-/* Definiere die Layer-Struktur */
 @layer base, layout, components, utilities;
 
-/* Basis-Styles und Variablen */
 @layer base {
   :host {
     --primary: #db5834;
@@ -35,7 +33,6 @@
   }
 }
 
-/* Layout-bezogene Styles */
 @layer layout {
   :host {
     position: fixed;
@@ -91,9 +88,8 @@
   }
 }
 
-/* Komponenten-Styles */
 @layer components {
-  /* Header-Komponente */
+
   #header-bar {
     background: var(--primary);
     color: white;
@@ -128,7 +124,6 @@
     background: rgba(255,255,255,0.2);
   }
 
-  /* Login-Komponente */
   #login-screen {
     flex: 1;
     display: flex;
@@ -167,7 +162,7 @@
     background: var(--primary-dark);
   }
 
-  /* Chat-Header-Komponente */
+  
   #user-name {
     padding: 8px 16px;
     font-weight: 500;
@@ -175,7 +170,7 @@
     border-bottom: 1px solid #eee;
   }
 
-  /* Chat-Controls-Komponente */
+  
   .chat-controls {
     display: flex;
     padding: 8px;
@@ -198,7 +193,7 @@
     border-radius: 20px;
   }
 
-  /* Chat-List-Item-Komponente */
+  
   #chat-list > div {
     padding: 10px 16px;
     cursor: pointer;
@@ -230,7 +225,7 @@
     text-overflow: ellipsis;
   }
 
-  /* Chat-Header-Info-Komponente */
+  
   #chat-header {
     padding: 10px 16px;
     background: #f8f9fa;
@@ -242,7 +237,7 @@
     font-weight: 500;
   }
 
-  /* Chat-Messages-Komponente */
+  
   #chat-messages > div {
     max-width: 80%;
     padding: 10px 14px;
@@ -288,9 +283,9 @@
     border: 1px dashed #ddd;
   }
 
-  /* Message-Input-Komponente */
+  
   #message-input-area {
-    display: flex; /* Immer anzeigen */
+    display: flex;
     padding: 12px;
     border-top: 1px solid #eee;
     background: white;
@@ -331,7 +326,7 @@
     font-weight: bold;
   }
 
-  /* Resize-Handle-Komponente */
+  
   #resize-handle::before {
     content: "";
     position: absolute;
@@ -344,7 +339,6 @@
   }
 }
 
-/* Utilities und Animationen */
 @layer utilities {
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(5px); }

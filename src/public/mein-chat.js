@@ -32,12 +32,7 @@ class MeinChat extends HTMLElement {
       style.textContent = css;
       this.shadowRoot.appendChild(style);
     } catch (e) {
-      console.warn('Konnte Styles nicht laden, lade Fallback-Styles...', e);
-      // Lade Fallback-Styles
-      const fallbackLink = document.createElement('link');
-      fallbackLink.rel = 'stylesheet';
-      fallbackLink.href = 'chat-fallback-styles.css';
-      this.shadowRoot.appendChild(fallbackLink);
+      console.warn('Styles konnten nicht geladen werden.', e);
     }
   }
 
@@ -119,12 +114,11 @@ class MeinChat extends HTMLElement {
     
     this.shadowRoot.appendChild(container);
     
-    // Anzeige steuern
+
     if (!this.isOpen) this.style.display = "none";
     else this.style.display = "block";
   }
 
-  // Rest des Codes bleibt unverändert
   addEventListeners() {
     this.shadowRoot.getElementById("login-btn").onclick = () => this.login();
     this.shadowRoot.getElementById("send-btn").onclick = () => this.sendMessage();
