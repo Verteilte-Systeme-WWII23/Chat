@@ -37,20 +37,17 @@ class MeinChat extends HTMLElement {
   }
 
   render() {
-    // HTML-Struktur mit semantischen Tags
     const container = document.createElement('div');
     container.className = 'container';
     container.id = 'meinchat-container';
-    
-    // Header-Bereich
+
     const header = document.createElement('header');
     header.id = 'header-bar';
     header.innerHTML = `
       <span>💬 Chat</span>
       <button id="close-btn" title="Schließen">×</button>
     `;
-    
-    // Login-Bereich
+
     const loginScreen = document.createElement('section');
     loginScreen.id = 'login-screen';
     loginScreen.innerHTML = `
@@ -58,60 +55,52 @@ class MeinChat extends HTMLElement {
       <input id="name-input" placeholder="Dein Name" />
       <button id="login-btn">Anmelden</button>
     `;
-    
-    // Hauptbereich
+
     const mainContainer = document.createElement('section');
     mainContainer.id = 'main-container';
-    
-    // User-Name
+
     const userName = document.createElement('div');
     userName.id = 'user-name';
-    
-    // Chat-Controls
+
     const chatControls = document.createElement('div');
     chatControls.className = 'chat-controls';
     chatControls.innerHTML = `
-      <input id="new-chat-input" placeholder="User-IDs (Komma getrennt)" />
-      <button id="new-chat-btn">Neu</button>
+      <button id="new-empty-chat-btn">Neuer Chat</button>
+      <input id="join-chat-id-input" placeholder="Chat-ID" />
+      <button id="join-chat-btn">Beitreten</button>
     `;
-    
-    // Chat-Liste
+
     const chatList = document.createElement('div');
     chatList.id = 'chat-list';
-    
-    // Chat-Header
+
     const chatHeader = document.createElement('div');
     chatHeader.id = 'chat-header';
-    
-    // Chat-Nachrichten
+
     const chatMessages = document.createElement('div');
     chatMessages.id = 'chat-messages';
-    
-    // Nachrichten-Eingabe
+
     const messageInputArea = document.createElement('div');
     messageInputArea.id = 'message-input-area';
     messageInputArea.innerHTML = `
       <input id="message-input" placeholder="Nachricht..." />
       <button id="send-btn"></button>
     `;
-    
-    // Resize-Handle
+
     const resizeHandle = document.createElement('div');
     resizeHandle.id = 'resize-handle';
-    
-    // Struktur zusammenbauen
+
     mainContainer.appendChild(userName);
     mainContainer.appendChild(chatControls);
     mainContainer.appendChild(chatList);
     mainContainer.appendChild(chatHeader);
     mainContainer.appendChild(chatMessages);
     mainContainer.appendChild(messageInputArea);
-    
+
     container.appendChild(header);
     container.appendChild(loginScreen);
     container.appendChild(mainContainer);
     container.appendChild(resizeHandle);
-    
+
     this.shadowRoot.appendChild(container);
     
 
@@ -125,10 +114,10 @@ class MeinChat extends HTMLElement {
     this.shadowRoot.getElementById("message-input").onkeypress = (e) => {
       if (e.key === "Enter") this.sendMessage();
     };
-    this.shadowRoot.getElementById("new-chat-btn").onclick = () => this.startNewChat();
+    this.shadowRoot.getElementById("new-empty-chat-btn").onclick = () => this.createEmptyChat();
+    this.shadowRoot.getElementById("join-chat-btn").onclick = () => this.joinChatById();
     this.shadowRoot.getElementById("close-btn").onclick = () => this.closeChat();
 
-    // Drag & Drop für Floating
     const header = this.shadowRoot.getElementById("header-bar");
     let offsetX, offsetY, isDragging = false;
     header.addEventListener("mousedown", (e) => {
@@ -185,7 +174,6 @@ class MeinChat extends HTMLElement {
   }
 
   initSocket() {
-    // userId aus LocalStorage holen, bevor die Verbindung aufgebaut wird!
     this.myId = localStorage.getItem("chatUserId") || "";
     this.socket = new WebSocket(`ws://${location.host}`);
 
@@ -200,13 +188,11 @@ class MeinChat extends HTMLElement {
 
       if (data.type === "welcome") {
         this.myId = data.userId;
-        this.myName = data.name || ""; // <-- Name vom Server übernehmen!
+        this.myName = data.name || "";
         localStorage.setItem("chatUserId", this.myId);
 
-        // Zeige den Namen im UI
         this.shadowRoot.getElementById("user-name").textContent = this.myName || "Mein Name";
 
-        // Loginmaske nur anzeigen, wenn noch Gastname
         if (!this.myName || this.myName.startsWith("Gast_")) {
           this.shadowRoot.getElementById("login-screen").style.display = "block";
           this.shadowRoot.getElementById("main-container").style.display = "none";
@@ -215,6 +201,12 @@ class MeinChat extends HTMLElement {
           this.shadowRoot.getElementById("main-container").style.display = "flex";
           this.loadMyChats();
         }
+      }
+
+      if (data.type === "emptyChatCreated" || data.type === "joinedChat") {
+        this.openChat({ id: data.chatId, participants: data.participants });
+        this.loadMyChats();
+        alert(`Chat-ID: ${data.chatId}`);
       }
 
       if (data.type === "message") {
@@ -234,6 +226,7 @@ class MeinChat extends HTMLElement {
       }
 
       if (data.type === "myChats") {
+        console.log("Meine Chats:", data.chats);
         this.myChats = data.chats;
         this.displayChatList();
       }
@@ -242,11 +235,10 @@ class MeinChat extends HTMLElement {
         this.currentChatId = data.chatId;
         this.currentParticipants = data.participants;
 
-        // Namen im Chat-Objekt speichern
         if (data.names) {
-          let chat = this.myChats.find(c => c.chatId === data.chatId);
+          let chat = this.myChats.find(c => c.id === data.chatId || c.chatId === data.chatId);
           if (!chat) {
-            chat = { chatId: data.chatId, participants: data.participants, names: data.names };
+            chat = { id: data.chatId, participants: data.participants, names: data.names };
             this.myChats.push(chat);
           } else {
             chat.names = { ...chat.names, ...data.names };
@@ -271,7 +263,6 @@ class MeinChat extends HTMLElement {
     this.shadowRoot.getElementById("login-screen").style.display = "none";
     this.shadowRoot.getElementById("main-container").style.display = "flex";
 
-    // Nach Login: Chats laden
     this.loadMyChats();
   }
 
@@ -283,11 +274,7 @@ class MeinChat extends HTMLElement {
     const chatList = this.shadowRoot.getElementById("chat-list");
     chatList.innerHTML = "";
     this.myChats.forEach((chat) => {
-      // Namen der anderen Teilnehmer holen
-      const otherNames = chat.participants
-        .filter((id) => id !== this.myId)
-        .map((id) => (chat.names && chat.names[id]) ? chat.names[id] : id)
-        .join(", ");
+      const chatId = chat.chatId || chat.id; // Fallback falls Backend noch "id" liefert
       const chatItem = document.createElement("div");
       chatItem.className = "chat-item";
       chatItem.onclick = () => this.openChat(chat);
@@ -308,13 +295,13 @@ class MeinChat extends HTMLElement {
       const isUnread = chat.lastMessage && chat.lastMessage.from !== this.myId;
 
       chatItem.innerHTML = `
-        <h4 style="${isUnread ? "font-weight: bold;" : ""}">${otherNames}</h4>
+        <h4 style="${isUnread ? "font-weight: bold;" : ""}">Chat-ID: ${chatId}</h4>
         <p style="${isUnread ? "font-weight: bold; color: #333;" : ""}">
           ${lastMessageText} ${lastMessageTime ? "• " + lastMessageTime : ""}
         </p>
       `;
 
-      if (this.currentChatId === chat.chatId) {
+      if (this.currentChatId === chatId) {
         chatItem.classList.add("active");
       }
 
@@ -325,10 +312,8 @@ class MeinChat extends HTMLElement {
   getUserName(userId, participants) {
     if (userId === this.myId) return this.myName;
     if (userId === "AI") return "KI-Assistent";
-    // Suche Namen im aktuellen Chat
-    let chat = this.myChats.find(c => c.chatId === this.currentChatId);
+    let chat = this.myChats.find(c => c.id === this.currentChatId || c.chatId === this.currentChatId);
     if (chat && chat.names && chat.names[userId]) return chat.names[userId];
-    // Fallback: Suche in allen Chats
     for (const c of this.myChats) {
       if (c.names && c.names[userId]) return c.names[userId];
     }
@@ -348,7 +333,6 @@ class MeinChat extends HTMLElement {
 
     this.shadowRoot.getElementById("new-chat-input").value = "";
 
-    // Sende die Namen an den Server
     this.socket.send(
       JSON.stringify({
         type: "getChatHistoryByNames",
@@ -357,38 +341,46 @@ class MeinChat extends HTMLElement {
     );
   }
 
+  createEmptyChat() {
+    this.socket.send(JSON.stringify({ type: "createEmptyChat" }));
+  }
+
+  joinChatById() {
+    const chatId = this.shadowRoot.getElementById("join-chat-id-input").value.trim();
+    if (!chatId) return alert("Bitte gib eine Chat-ID ein");
+    this.socket.send(JSON.stringify({ type: "joinChatById", chatId }));
+  }
+
   openChat(chat) {
-    if (!chat.participants.includes(this.myId)) {
-      chat.participants.push(this.myId);
-    }
-    this.currentChatId = chat.chatId || null;
+    const chatId = chat.chatId || chat.id;
+    this.currentChatId = chatId;
     this.currentParticipants = chat.participants;
 
     this.socket.send(
       JSON.stringify({
         type: "getChatHistory",
-        participants: chat.participants,
+        chatId: chatId,
       })
     );
 
     this.shadowRoot.querySelectorAll(".chat-item").forEach((item, idx) => {
-      if (this.myChats[idx] && this.myChats[idx].chatId === chat.chatId) {
+      const c = this.myChats[idx];
+      const cId = c ? (c.chatId || c.id) : null;
+      if (cId === chatId) {
         item.classList.add("active");
       } else {
         item.classList.remove("active");
       }
     });
 
-    // Eingabefeld immer anzeigen, auch wenn keine Nachrichten da sind
     this.shadowRoot.getElementById("message-input-area").style.display = "flex";
   }
 
   displayChatHistory(messages) {
     const chatMessages = this.shadowRoot.getElementById("chat-messages");
     chatMessages.innerHTML = "";
-    
+
     if (messages.length === 0) {
-      // Leere Nachricht anzeigen, wenn keine Nachrichten vorhanden sind
       const emptyMessage = document.createElement("div");
       emptyMessage.className = "empty-message";
       emptyMessage.textContent = "Noch keine Nachrichten. Schreibe etwas, um die Unterhaltung zu beginnen!";
@@ -403,7 +395,7 @@ class MeinChat extends HTMLElement {
         );
       });
     }
-    
+
     this.scrollToBottom();
   }
 
@@ -429,23 +421,20 @@ class MeinChat extends HTMLElement {
   }
 
   updateChatHeader(participants) {
-    const otherNames = participants
-      .filter((id) => id !== this.myId)
-      .map((id) => this.getUserName(id, participants))
-      .join(", ");
-    this.shadowRoot.getElementById("chat-header").innerHTML = `<h3>Chat mit ${otherNames}</h3>`;
+    this.shadowRoot.getElementById("chat-header").innerHTML =
+      `<h3>Chat-ID: ${this.currentChatId}</h3>`;
   }
 
   sendMessage() {
     const messageInput = this.shadowRoot.getElementById("message-input");
     const text = messageInput.value.trim();
 
-    if (!text || !this.currentParticipants.length) return;
+    if (!text || !this.currentChatId) return;
 
     this.socket.send(
       JSON.stringify({
         type: "messageTo",
-        to: this.currentParticipants,
+        chatId: this.currentChatId,
         text,
       })
     );

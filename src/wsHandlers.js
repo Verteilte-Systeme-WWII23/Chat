@@ -8,10 +8,13 @@ import {
   getAllUsers,
 } from "./userManager.js";
 import {
-  findOrCreateChat,
   addMessageToChat,
   getChatHistory,
   getUserChats,
+  createEmptyChatForUser,
+  joinChatById,
+  getChats,
+  createAIChatForUser,
 } from "./chatManager.js";
 import { getAIResponse } from "./ai.js";
 
@@ -38,8 +41,20 @@ export function handleConnection(ws, req) {
       // Erstverbindung: userId noch nicht gesetzt
       if (!userId) {
         userId = addUser(ws, ip); // ip wird nur als Zusatzinfo gespeichert
+        // AI-Chat nach Login automatisch anlegen (nur wenn noch nicht vorhanden)
+        const userChats = getUserChats(userId);
+        const hasAIChat = userChats.some(
+          chat => chat.participants.includes("AI")
+        );
+        if (!hasAIChat) {
+          const aiChatId = createAIChatForUser(userId);
+          ws.send(JSON.stringify({
+            type: "aiChatCreated",
+            chatId: aiChatId,
+            participants: [userId, "AI"],
+          }));
+        }
         ws.send(JSON.stringify({ type: "welcome", userId, name: getUser(userId)?.name }));
-        findOrCreateChat([userId, "AI"]);
         return;
       }
 
@@ -51,14 +66,19 @@ export function handleConnection(ws, req) {
 
       // Nachricht senden
       if (data.type === "messageTo") {
-        const participantIds = Array.isArray(data.to) ? data.to : [data.to];
-        if (!participantIds.includes(userId)) participantIds.push(userId);
-        if (!participantIds.every(hasUser)) return;
+        const { chatId, text } = data;
+        const chat = getChats().get(chatId);
+        if (!chat) {
+          ws.send(JSON.stringify({ type: "error", message: "Chat existiert nicht." }));
+          return;
+        }
+        if (!chat.participants.includes(userId)) {
+          ws.send(JSON.stringify({ type: "error", message: "Du bist kein Teilnehmer dieses Chats." }));
+          return;
+        }
+        const message = addMessageToChat(chatId, userId, text);
 
-        const chatId = findOrCreateChat(participantIds);
-        const message = addMessageToChat(chatId, userId, data.text);
-
-        for (const pid of participantIds) {
+        for (const pid of chat.participants) {
           const user = getUser(pid);
           if (user && user.ws.readyState === ws.OPEN) {
             user.ws.send(
@@ -67,17 +87,17 @@ export function handleConnection(ws, req) {
                 chatId,
                 messageId: message.id,
                 from: userId,
-                text: data.text,
+                text,
                 timestamp: message.timestamp,
               })
             );
           }
         }
-
-        if (participantIds.includes("AI")) {
-          const response = await getAIResponse(data.text);
+        // AI-Logik ggf. anpassen, falls AI Teilnehmer ist
+        if (chat.participants.includes("AI")) {
+          const response = await getAIResponse(text);
           const aiMessage = addMessageToChat(chatId, "AI", response);
-          for (const pid of participantIds) {
+          for (const pid of chat.participants) {
             const user = getUser(pid);
             if (user && user.ws.readyState === ws.OPEN) {
               user.ws.send(
@@ -98,26 +118,31 @@ export function handleConnection(ws, req) {
 
       // Chat-Historie laden
       if (data.type === "getChatHistory") {
-        if (Array.isArray(data.participants)) {
-          const participantIds = [...data.participants];
-          if (!participantIds.includes(userId)) participantIds.push(userId);
-          const chatId = findOrCreateChat(participantIds);
-          const history = getChatHistory(chatId);
-          const names = {};
-          for (const pid of participantIds) {
-            const user = getUser(pid);
-            if (user) names[pid] = user.name;
-          }
-          ws.send(
-            JSON.stringify({
-              type: "chatHistory",
-              chatId,
-              participants: participantIds,
-              messages: history,
-              names, // <--- Namen mitgeben
-            })
-          );
+        const { chatId } = data;
+        const chat = getChats().get(chatId);
+        if (!chat) {
+          ws.send(JSON.stringify({ type: "error", message: "Chat existiert nicht." }));
+          return;
         }
+        if (!chat.participants.includes(userId)) {
+          ws.send(JSON.stringify({ type: "error", message: "Du bist kein Teilnehmer dieses Chats." }));
+          return;
+        }
+        const history = getChatHistory(chatId);
+        const names = {};
+        for (const pid of chat.participants) {
+          const user = getUser(pid);
+          if (user) names[pid] = user.name;
+        }
+        ws.send(
+          JSON.stringify({
+            type: "chatHistory",
+            chatId,
+            participants: chat.participants,
+            messages: history,
+            names,
+          })
+        );
         return;
       }
 
@@ -161,6 +186,36 @@ export function handleConnection(ws, req) {
         );
         return;
       }
+
+      // Leeren Chat anlegen (nur für sich selbst)
+      if (data.type === "createEmptyChat") {
+        const chatId = createEmptyChatForUser(userId);
+        ws.send(JSON.stringify({
+          type: "emptyChatCreated",
+          chatId,
+          participants: [userId],
+        }));
+        return;
+      }
+
+      // Chat per 5-stelliger ID beitreten
+      if (data.type === "joinChatById") {
+        const { chatId } = data;
+        const success = joinChatById(chatId, userId);
+        if (success) {
+          ws.send(JSON.stringify({
+            type: "joinedChat",
+            chatId,
+            participants: getChatParticipants(chatId),
+          }));
+        } else {
+          ws.send(JSON.stringify({
+            type: "error",
+            message: "Chat mit dieser ID existiert nicht.",
+          }));
+        }
+        return;
+      }
     } catch (e) {
       console.error("Ungültige Nachricht:", msg, e);
     }
@@ -170,4 +225,10 @@ export function handleConnection(ws, req) {
   // ws.on("close", () => {
   //   removeUser(userId);
   // });
+}
+
+// Hilfsfunktion für Teilnehmerliste
+function getChatParticipants(chatId) {
+  const chat = getChats().get(chatId);
+  return chat ? chat.participants : [];
 }
