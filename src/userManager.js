@@ -1,24 +1,24 @@
 import { v4 as uuidv4 } from "uuid";
 
-// userManager.js
-const users = new Map(); // userId => { ws, name, ip }
-const ipToUserId = new Map(); // ip => userId
+const users = new Map();
 users.set("AI", null);
+/*
+{
+  ws:  WebSocket-Objekt,
+  name: "Gast_ab12" oder ein gesetzter Name
+  ip: "127.0.0.1" oder die echte IP-Adresse des Nutzers
+}
+*/
+const bannedIps = new Set();
 
 export function addUser(ws, ip) {
-  // Erzeuge immer eine neue userId, wenn keine mitgegeben wird
   const userId = uuidv4();
-  let name = `Gast_${userId.slice(0, 4)}`;
-  while ([...users.values()].some(u => u && u.name === name)) {
-    name = `Gast_${uuidv4().slice(0, 4)}`;
-  }
+  const name = `Default_${userId.slice(0, 4)}`;
   users.set(userId, { ws, name, ip });
   return userId;
 }
 
 export function removeUser(userId) {
-  const user = users.get(userId);
-  if (user && user.ip) ipToUserId.delete(user.ip);
   users.delete(userId);
 }
 
@@ -31,24 +31,29 @@ export function getUser(userId) {
   return users.get(userId);
 }
 
-export function hasUser(userId) {
-  return users.has(userId);
-}
-
 export function getAllUsers() {
   return users;
 }
 
-// Für Admin-Tool: IP sperren
-const bannedIps = new Set();
-const bannedUsers = new Set();
+export function getUserName(userId) {
+  const user = users.get(userId);
+  return { name: user ? user.name : null, id: userId };
+}
 
 export function banIp(ip) {
   bannedIps.add(ip);
+  for (const [id, user] of users.entries()) {
+    if (user.ip === ip) {
+      user.ws.close();
+      users.ws = null;
+    }
+  }
 }
-export function banUser(userId) {
-  bannedUsers.add(userId);
+
+export function isBanned(ip) {
+  return bannedIps.has(ip);
 }
-export function isBanned(ip, userId) {
-  return bannedIps.has(ip) || bannedUsers.has(userId);
+
+export function unBanIp(ip) {
+  bannedIps.delete(ip);
 }

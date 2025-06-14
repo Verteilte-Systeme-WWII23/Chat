@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
+import { getUserName } from "./userManager.js";
 
 const chats = new Map();
 const messages = new Map();
 
-// Hilfsfunktion: 5-stellige zufällige Zahl als String
 function generateNumericChatId() {
   let id;
   do {
@@ -12,7 +12,6 @@ function generateNumericChatId() {
   return id;
 }
 
-// Leeren Chat für User anlegen
 export function createEmptyChatForUser(userId) {
   const chatId = generateNumericChatId();
   chats.set(chatId, {
@@ -24,7 +23,6 @@ export function createEmptyChatForUser(userId) {
   return chatId;
 }
 
-// AI Chat für User anlegen
 export function createAIChatForUser(userId) {
   const chatId = generateNumericChatId();
   chats.set(chatId, {
@@ -36,7 +34,6 @@ export function createAIChatForUser(userId) {
   return chatId;
 }
 
-// User tritt Chat per ID bei
 export function joinChatById(chatId, userId) {
   const chat = chats.get(chatId);
   if (!chat) return false;
@@ -59,38 +56,45 @@ export function addMessageToChat(chatId, fromUserId, text) {
   return message;
 }
 
-export function getChatHistory(chatId, limit = 50) {
-  const chatMessages = messages.get(chatId) || [];
-  return chatMessages.slice(-limit);
-}
-
 export function getUserChats(userId) {
   const userChats = [];
   for (const [chatId, chat] of chats.entries()) {
     if (chat.participants.includes(userId)) {
-      const chatMessages = messages.get(chatId) || [];
-      const lastMessage = chatMessages[chatMessages.length - 1];
+      const participants = getChatParticipants(chatId);
+      const lastMessages = getChatHistory(chatId, 1);
       userChats.push({
         chatId,
-        participants: chat.participants,
+        participants: participants,
         createdAt: chat.createdAt,
-        messageCount: chatMessages.length,
-        lastMessage: lastMessage || null,
+        lastMessage: lastMessages.length > 0 ? lastMessages[0] : null,
       });
     }
   }
   return userChats;
 }
 
-export function getChats() {
-  return chats;
+export function getChat(chatId, limit = 50) {
+  const participants = getChatParticipants(chatId);
+  const chatMessages = getChatHistory(chatId, limit);
+  return {
+    id: chatId,
+    participants,
+    messages: chatMessages,
+  };
 }
 
-export function getMessages(chatId) {
-  return messages.get(chatId) || [];
-}
-
-export function getChatParticipants(chatId) {
+function getChatParticipants(chatId) {
   const chat = chats.get(chatId);
-  return chat ? chat.participants : [];
+  const participantIds = chat ? chat.participants : [];
+  const participants = [];
+  for (const participantId of participantIds) {
+    const { name, id } = getUserName(participantId);
+    participants.push({ name, id });
+  }
+  return participants;
+}
+
+function getChatHistory(chatId, limit = 50) {
+  const chatMessages = messages.get(chatId) || [];
+  return chatMessages.slice(-limit);
 }

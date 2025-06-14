@@ -24,16 +24,10 @@ class MeinChat extends HTMLElement {
   }
 
   async loadStyles() {
-    try {
-      const response = await fetch('chat-styles.css');
-      if (!response.ok) throw new Error('CSS nicht gefunden');
-      const css = await response.text();
-      const style = document.createElement('style');
-      style.textContent = css;
-      this.shadowRoot.appendChild(style);
-    } catch (e) {
-      console.warn('Styles konnten nicht geladen werden.', e);
-    }
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'chat-styles.css';
+    this.shadowRoot.appendChild(link);
   }
 
   render() {
@@ -202,7 +196,7 @@ class MeinChat extends HTMLElement {
 
         this.shadowRoot.getElementById("user-name").textContent = this.myName || "Mein Name";
 
-        if (!this.myName || this.myName.startsWith("Gast_")) {
+        if (!this.myName || this.myName.toLowerCase().startsWith("default_")) {
           this.shadowRoot.getElementById("login-screen").style.display = "block";
           this.shadowRoot.getElementById("main-container").style.display = "none";
         } else {
@@ -213,12 +207,23 @@ class MeinChat extends HTMLElement {
       }
 
       if (data.type === "emptyChatCreated" || data.type === "joinedChat") {
-        this.openChat({ id: data.chatId, participants: data.participants });
+        // Teilnehmer flatten:
+        let participants = data.participants;
+        if (Array.isArray(participants) && participants[0]?.participant) {
+          participants = participants.map(p => p.participant);
+        }
+        this.openChat({ id: data.chatId, participants });
         this.loadMyChats();
         alert(`Chat-ID: ${data.chatId}`);
       }
 
       if (data.type === "message") {
+        // Teilnehmer flatten falls nötig:
+        let participants = this.currentParticipants;
+        if (Array.isArray(participants) && participants[0]?.participant) {
+          participants = participants.map(p => p.participant);
+          this.currentParticipants = participants;
+        }
         if (data.chatId === this.currentChatId) {
           this.displayMessage(
             data.from,
@@ -234,28 +239,27 @@ class MeinChat extends HTMLElement {
         this.loadMyChats();
       }
 
-      if (data.type === "myChats") {
-        console.log("Meine Chats:", data.chats);
+      if (data.type === "userChats") {
+        console.log("User chats received:", data);
         this.myChats = data.chats;
         this.displayChatList();
       }
 
-      if (data.type === "chatHistory") {
-        this.currentChatId = data.chatId;
-        this.currentParticipants = data.participants;
-
-        if (data.names) {
-          let chat = this.myChats.find(c => c.id === data.chatId || c.chatId === data.chatId);
-          if (!chat) {
-            chat = { id: data.chatId, participants: data.participants, names: data.names };
-            this.myChats.push(chat);
-          } else {
-            chat.names = { ...chat.names, ...data.names };
-          }
+      if (data.type === "chat") {
+        console.log("Chat data received:", data);
+        let participants = data.participants;
+        if (Array.isArray(participants) && participants[0]?.participant) {
+          participants = participants.map(p => p.participant);
         }
-
+        this.currentChatId = data.chatId;
+        this.currentParticipants = participants;
         this.displayChatHistory(data.messages);
-        this.updateChatHeader(data.participants);
+        this.updateChatHeader(participants);
+      }
+
+      if (data.type === "banned") {
+        alert(data.reason || "Du wurdest gesperrt.");
+        this.closeChat();
       }
     };
   }
@@ -276,22 +280,36 @@ class MeinChat extends HTMLElement {
   }
 
   loadMyChats() {
-    this.socket.send(JSON.stringify({ type: "getMyChats" }));
+    this.socket.send(JSON.stringify({ type: "getUserChats" }));
   }
 
   displayChatList() {
     const chatList = this.shadowRoot.getElementById("chat-list");
     chatList.innerHTML = "";
     this.myChats.forEach((chat) => {
-      const chatId = chat.chatId || chat.id; // Fallback falls Backend noch "id" liefert
+      const chatId = chat.chatId || chat.id;
       const chatItem = document.createElement("div");
       chatItem.className = "chat-item";
       chatItem.onclick = () => this.openChat(chat);
 
+      // Teilnehmer flatten:
+      let participants = chat.participants;
+      if (Array.isArray(participants) && participants[0]?.participant) {
+        participants = participants.map(p => p.participant);
+      }
+
+      let participantNames = "";
+      if (Array.isArray(participants)) {
+        participantNames = participants
+          .filter(p => p.id !== this.myId)
+          .map(p => (p.name || p.id))
+          .join(", ");
+      }
+
       const lastMessageText = chat.lastMessage
         ? (chat.lastMessage.from === this.myId
             ? "Du: "
-            : ((chat.names && chat.names[chat.lastMessage.from]) ? chat.names[chat.lastMessage.from] : chat.lastMessage.from) + ": ") + chat.lastMessage.text
+            : (this.getUserName(chat.lastMessage.from, participants) + ": ")) + chat.lastMessage.text
         : "Noch keine Nachrichten";
 
       const lastMessageTime = chat.lastMessage
@@ -304,7 +322,10 @@ class MeinChat extends HTMLElement {
       const isUnread = chat.lastMessage && chat.lastMessage.from !== this.myId;
 
       chatItem.innerHTML = `
-        <h4 style="${isUnread ? "font-weight: bold;" : ""}">Chat-ID: ${chatId}</h4>
+        <h4 style="${isUnread ? "font-weight: bold;" : ""}">
+          ${participantNames ? participantNames : "Chat"}<br>
+          <span style="font-size:0.85em;color:#888;">ID: ${chatId}</span>
+        </h4>
         <p style="${isUnread ? "font-weight: bold; color: #333;" : ""}">
           ${lastMessageText} ${lastMessageTime ? "• " + lastMessageTime : ""}
         </p>
@@ -320,11 +341,10 @@ class MeinChat extends HTMLElement {
 
   getUserName(userId, participants) {
     if (userId === this.myId) return this.myName;
-    if (userId === "AI") return "KI-Assistent";
-    let chat = this.myChats.find(c => c.id === this.currentChatId || c.chatId === this.currentChatId);
-    if (chat && chat.names && chat.names[userId]) return chat.names[userId];
-    for (const c of this.myChats) {
-      if (c.names && c.names[userId]) return c.names[userId];
+
+    if (Array.isArray(participants)) {
+      const found = participants.find(p => p.id === userId);
+      if (found && found.name) return found.name;
     }
     return userId;
   }
@@ -362,16 +382,20 @@ class MeinChat extends HTMLElement {
 
   openChat(chat) {
     const chatId = chat.chatId || chat.id;
+    // Teilnehmer flatten:
+    let participants = chat.participants;
+    if (Array.isArray(participants) && participants[0]?.participant) {
+      participants = participants.map(p => p.participant);
+    }
     this.currentChatId = chatId;
-    this.currentParticipants = chat.participants;
+    this.currentParticipants = participants;
 
     this.socket.send(
       JSON.stringify({
-        type: "getChatHistory",
+        type: "getChat",
         chatId: chatId,
       })
     );
-
     this.shadowRoot.querySelectorAll(".chat-item").forEach((item, idx) => {
       const c = this.myChats[idx];
       const cId = c ? (c.chatId || c.id) : null;
@@ -430,16 +454,29 @@ class MeinChat extends HTMLElement {
   }
 
   updateChatHeader(participants) {
+    if (Array.isArray(participants) && participants[0]?.participant) {
+      participants = participants.map(p => p.participant);
+    }
+    const names = participants
+      .filter(p => p.id !== this.myId)
+      .map(p => (p.name || p.id))
+      .join(", ");
+
     this.shadowRoot.getElementById("chat-header").innerHTML =
-      `<h3>Chat-ID: ${this.currentChatId}</h3>`;
+      `<h3>
+        <span>Chat-ID: ${this.currentChatId}</span>
+        <span style="margin-left:20px;font-weight:normal;font-size:1em;color:#555;">
+          ${names ? "Teilnehmer: " + names : ""}
+        </span>
+      </h3>`;
   }
 
   sendMessage() {
     const messageInput = this.shadowRoot.getElementById("message-input");
     const text = messageInput.value.trim();
+    console.log("SendMessage called", {text, chatId: this.currentChatId, socketReady: this.socket.readyState});
 
     if (!text || !this.currentChatId) return;
-
     this.socket.send(
       JSON.stringify({
         type: "messageTo",
@@ -447,7 +484,6 @@ class MeinChat extends HTMLElement {
         text,
       })
     );
-
     messageInput.value = "";
   }
 

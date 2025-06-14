@@ -125,11 +125,6 @@
     border-radius: var(--radius) var(--radius) 0 0;
   }
 
-  #header-bar span::before {
-    content: "💬";
-    margin-right: 8px;
-  }
-
   #close-btn {
     background: none;
     color: white;
