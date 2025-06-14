@@ -153,6 +153,19 @@ export function handleConnection(ws, req) {
             participants: chat.participants,
             createdAt: chat.createdAt,
           }));
+
+          for (const participant of chat.participants) {
+            if (participant.id === userId) continue;
+            const user = getUser(participant.id);
+            if (user && user.ws.readyState === ws.OPEN) {
+              user.ws.send(
+                JSON.stringify({
+                  type: "participantJoined",
+                  chatId
+                })
+              );
+            }
+          }
         } else {
           ws.send(JSON.stringify({
             type: "error",

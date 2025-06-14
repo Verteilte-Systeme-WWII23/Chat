@@ -206,7 +206,7 @@ class MeinChat extends HTMLElement {
         }
       }
 
-      if (data.type === "emptyChatCreated" || data.type === "joinedChat") {
+      if (data.type === "emptyChatCreated" || data.type === "joinedChat" || data.type === "participantJoined") {
         // Teilnehmer flatten:
         let participants = data.participants;
         if (Array.isArray(participants) && participants[0]?.participant) {
@@ -240,13 +240,11 @@ class MeinChat extends HTMLElement {
       }
 
       if (data.type === "userChats") {
-        console.log("User chats received:", data);
         this.myChats = data.chats;
         this.displayChatList();
       }
 
       if (data.type === "chat") {
-        console.log("Chat data received:", data);
         let participants = data.participants;
         if (Array.isArray(participants) && participants[0]?.participant) {
           participants = participants.map(p => p.participant);
@@ -474,7 +472,6 @@ class MeinChat extends HTMLElement {
   sendMessage() {
     const messageInput = this.shadowRoot.getElementById("message-input");
     const text = messageInput.value.trim();
-    console.log("SendMessage called", {text, chatId: this.currentChatId, socketReady: this.socket.readyState});
 
     if (!text || !this.currentChatId) return;
     this.socket.send(
