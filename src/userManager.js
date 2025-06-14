@@ -43,9 +43,10 @@ export function getUserName(userId) {
 export function banIp(ip) {
   bannedIps.add(ip);
   for (const [id, user] of users.entries()) {
+    if (!user) continue;
     if (user.ip === ip) {
       user.ws.close();
-      users.ws = null;
+      user.ws = null;
     }
   }
 }

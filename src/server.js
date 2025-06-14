@@ -33,13 +33,6 @@ app.post("/admin/ban/ip", express.json(), (req, res) => {
 });
 
 
-app.post("/admin/ban/user", express.json(), (req, res) => {
-  const { userId } = req.body;
-  if (!userId) return res.status(400).json({ error: "UserId fehlt" });
-  banUser(userId);
-  res.json({ success: true });
-});
-
 app.use(express.static(path.join(__dirname, "public")));
 
 
