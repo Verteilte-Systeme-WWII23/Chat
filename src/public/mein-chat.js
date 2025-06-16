@@ -24,9 +24,10 @@ class MeinChat extends HTMLElement {
   }
 
   async loadStyles() {
+    const cssUrl = new URL('chat-styles.css', import.meta.url).toString();
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'chat-styles.css';
+    link.href = cssUrl;
     this.shadowRoot.appendChild(link);
   }
 
