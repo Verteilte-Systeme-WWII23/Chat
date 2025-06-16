@@ -4,7 +4,7 @@ import { WebSocketServer } from "ws";
 import path from "path";
 import { fileURLToPath } from "url";
 import { handleConnection } from "./wsHandlers.js";
-import { getAllUsers, banIp, unBanIp } from "./userManager.js";
+import { getAllUsers, getBannedIps, banIp, unBanIp } from "./userManager.js";
 import dotenv from 'dotenv';
 dotenv.config({ path: '../.env' });
 
@@ -32,13 +32,25 @@ function adminRoute(handler) {
 
 app.use("/admin", express.json());
 
-app.get("/admin/users", adminRoute((req, res) => {
+app.post("/admin/users", adminRoute((req, res) => {
   const users = [];
   for (const [id, user] of getAllUsers().entries()) {
     if (user)
       users.push({ id, name: user.name, ip: user.ip });
   }
   res.json(users);
+}));
+
+app.post("/admin/banned-ips", adminRoute((req, res) => {
+  const bannedUserIps = []
+  const users = getAllUsers();
+  const bannedIps = Array.from(getBannedIps());
+  users.forEach((user, id) => {
+    if (user && bannedIps.includes(user.ip)) {
+      bannedUserIps.push({ id, name: user.name, ip: user.ip });
+    }
+  });
+  res.json(bannedUserIps);
 }));
 
 app.post("/admin/ban/ip", adminRoute((req, res) => {
