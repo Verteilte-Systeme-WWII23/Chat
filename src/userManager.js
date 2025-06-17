@@ -40,7 +40,13 @@ export function getUserName(userId) {
   return { name: user ? user.name : null, id: userId };
 }
 
+export function getBannedIps() {
+  return bannedIps;
+}
+
 export function banIp(ip) {
+  if(bannedIps.has(ip)) return; 
+
   bannedIps.add(ip);
   for (const [id, user] of users.entries()) {
     if (!user) continue;

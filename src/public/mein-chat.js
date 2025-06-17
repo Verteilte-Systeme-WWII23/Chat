@@ -40,7 +40,10 @@ class MeinChat extends HTMLElement {
     header.id = 'header-bar';
     header.innerHTML = `
       <span>💬 Chat</span>
-      <button id="close-btn" title="Schließen">×</button>
+      <div class="header-controls">
+        <button id="admin-btn" title="Admin-Bereich">👤</button>
+        <button id="close-btn" title="Schließen">×</button>
+      </div>
     `;
 
     const loginScreen = document.createElement('section');
@@ -121,6 +124,7 @@ class MeinChat extends HTMLElement {
     this.shadowRoot.getElementById("new-empty-chat-btn").onclick = () => this.createEmptyChat();
     this.shadowRoot.getElementById("join-chat-btn").onclick = () => this.joinChatById();
     this.shadowRoot.getElementById("close-btn").onclick = () => this.closeChat();
+    this.shadowRoot.getElementById("admin-btn").onclick = () => this.openAdminPage();
 
     const header = this.shadowRoot.getElementById("header-bar");
     let offsetX, offsetY, isDragging = false;
@@ -488,6 +492,10 @@ class MeinChat extends HTMLElement {
   scrollToBottom() {
     const chatMessages = this.shadowRoot.getElementById("chat-messages");
     chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  openAdminPage() {
+    window.open('/admin.html', '_blank');
   }
 }
 

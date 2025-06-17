@@ -375,6 +375,31 @@
     border-right: 2px solid rgba(0,0,0,0.3);
     border-bottom: 2px solid rgba(0,0,0,0.3);
   }
+
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #admin-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2em;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  #admin-btn:hover {
+    background: rgba(255,255,255,0.2);
+  }
 }
 
 @layer utilities {
