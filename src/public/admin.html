@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat Admin</title>
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <div id="login-section" class="login-container">
+      <h2>Admin-Login</h2>
+      <div class="form-group">
+        <label for="password">Admin-Passwort</label>
+        <input type="password" id="password" placeholder="Passwort eingeben" />
+        <div id="login-error" class="error"></div>
+      </div>
+      <button id="login-btn" class="login-btn">Anmelden</button>
+    </div>
+
+    <div id="admin-section" style="display: none">
+      <header>
+        <h1>Chat-Administration</h1>
+        <div class="header-buttons">
+          <button id="refresh-all" class="refresh-btn"><span class="refresh-icon">↻</span> Aktualisieren</button>
+          <button id="logout-btn">Abmelden</button>
+        </div>
+      </header>
+
+      <div class="tables-container" id="tables-container">
+        <h2>Aktive Benutzer</h2>
+        <div id="users-container">
+          <table id="users-table">
+            <thead>
+              <tr>
+                <th>Benutzer-ID</th>
+                <th>Name</th>
+                <th>IP-Adresse</th>
+                <th>Aktion</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr>
+                <td colspan="4" class="empty-state">
+                  Benutzer werden geladen...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Gesperrte Benutzer</h2>
+        <div id="banned-container">
+          <table id="banned-table">
+            <thead>
+              <tr>
+                <th>Benutzer-ID</th>
+                <th>Name</th>
+                <th>IP-Adresse</th>
+                <th>Aktion</th>
+              </tr>
+            </thead>
+            <tbody id="banned-tbody">
+              <tr>
+                <td colspan="4" class="empty-state">
+                  Gesperrte Benutzer werden geladen...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="admin.js"></script>
+</html>

@@ -1,0 +1,201 @@
+:root {
+    --primary: #db5834;
+    --primary-dark: #b54422;
+    --light: #ecf0f1;
+    --dark: #34495e;
+    --danger: #e74c3c;
+    --success: #2ecc71;
+    --warning: #f39c12;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f6f7fa;
+    color: var(--dark);
+    line-height: 1.6;
+    padding: 20px;
+  }
+
+  header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  h1 {
+    color: var(--primary);
+  }
+
+  h2 {
+    margin: 1.5rem 0 1rem;
+    color: var(--dark);
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 0.5rem;
+    display: inline-block;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  th,
+  td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  th {
+    background-color: var(--primary);
+    color: white;
+    font-weight: 500;
+  }
+
+  tr:hover {
+    background-color: #f9f9f9;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .ban-btn {
+    background-color: var(--danger);
+    color: white;
+  }
+
+  .ban-btn:hover {
+    background-color: #c0392b;
+  }
+
+  .unban-btn {
+    background-color: var(--success);
+    color: white;
+  }
+
+  .unban-btn:hover {
+    background-color: #27ae60;
+  }
+
+  .login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+
+  input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+
+  .login-btn {
+    background-color: var(--primary);
+    color: white;
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+  }
+
+  .login-btn:hover {
+    background-color: var(--primary-dark);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #7f8c8d;
+    font-style: italic;
+  }
+
+  .refresh-btn {
+    background-color: var(--primary);
+    color: white;
+  }
+
+  .refresh-btn:hover {
+    background-color: var(--primary-dark);
+  }
+
+  .loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .tables-container.loading::after {
+    content: "Daten werden geladen...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px 20px;
+    border-radius: 4px;
+    box-shadow: var(--shadow);
+    z-index: 10;
+  }
+
+  .tables-container {
+    position: relative;
+  }
+
+  .error {
+    color: var(--danger);
+    margin-top: 5px;
+  }
+
+  #logout-btn {
+    background-color: var(--warning);
+    color: white;
+  }
+
+  #logout-btn:hover {
+    background-color: #e67e22;
+  }
+
+  .refresh-icon {
+    margin-right: 5px;
+  }
