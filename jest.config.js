@@ -1,4 +1,7 @@
-module.exports = {
+export default {
+  transform: {},
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
   testEnvironment: 'node',
-  testMatch: ['**/src/**/*.test.js'],
 };
