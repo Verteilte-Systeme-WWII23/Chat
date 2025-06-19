@@ -1,10 +1,10 @@
-import {users} from './userManager';
-import {v4 as uuidv4} from 'uuid';
-import WS from "jest-websocket-mock";
-
-jest.mock('uuid', ()=> ({
-    v4: jest.fn()
+import {jest} from '@jest/globals';
+import {WS} from "jest-websocket-mock";
+jest.unstable_mockModule('uuid', ()=> ({
+    v4: () => '1234567890'
 }));
+
+let userManager;
 
 describe("userManager", () => {
 
@@ -12,11 +12,10 @@ describe("userManager", () => {
     const TEST_UUID = "1234567890";
     const TEST_IP = "1.2.3.4";
 
-    beforeEach( () => {
+    beforeEach( async () => {
+        userManager = await import('./userManager');
         server = new WS(`ws://localhost:4433`);
-        users.clear();
-//       users.set("AI", null);
-        uuidv4.mockReturnValue(TEST_UUID);
+        userManager.users.set("AI", null);
     });
 
     afterEach( () => {
@@ -27,11 +26,10 @@ describe("userManager", () => {
         const ws = new WebSocket(`ws://localhost:4433`);
         await server.connected;
 
-        const userId = addUser(ws, TEST_IP);
+        const userId = userManager.addUser(ws, TEST_IP);
         expect(userId).toBe(TEST_UUID);
-        
-        expect(users.has(userId)).toBe(true);
-        const user = users.get(userId);
+        expect(userManager.users.has(userId)).toBe(true);
+        const user = userManager.users.get(userId);
 
         expect(user).toMatchObject({
             ws,
