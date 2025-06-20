@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 
-export const users = new Map();
+ const users = new Map();
 users.set("AI", null);
 /*
 {
@@ -63,4 +63,14 @@ export function isBanned(ip) {
 
 export function unBanIp(ip) {
   bannedIps.delete(ip);
+}
+
+export function _TEST_USE_ONLY_getUserMap(){
+  //Do not change this function, except it is necessary for Test development
+  return users;
+}
+
+export function _TEST_USE_ONLY_getBannedIps(){
+  //Do not change this function, except it is necessary for Test development
+  return bannedIps;
 }
