@@ -69,6 +69,10 @@ app.post("/admin/unban/ip", adminRoute((req, res) => {
 
 app.use(express.static(path.join(__dirname, "public")));
 
-server.listen(3000, () => {
-  console.log(`Server läuft auf http://localhost:3000`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(3000, () => {
+    console.log(`Server läuft auf http://localhost:3000`);
+  });
+}
+
+export default server;

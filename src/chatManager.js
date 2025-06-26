@@ -98,13 +98,3 @@ function getChatHistory(chatId, limit = 50) {
   const chatMessages = messages.get(chatId) || [];
   return chatMessages.slice(-limit);
 }
-
-export function _TEST_USE_ONLY_getChats(){
-  //Do not change this function, except it is necessary for Test development
-  return chats;
-}
-
-export function _TEST_USE_ONLY_getMessages(){
-  //Do not change this function, except it is necessary for Test development
-  return messages;
-}
