@@ -8,12 +8,20 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      include: ['src/**/*.js'],
+      exclude: ['src/public/**']
     },
     deps: {
-      inline: ['ws']
+      optimizer: {
+        ssr: {
+          include: ['ws']
+        }
+      }
     },
-    // Server-Tests benötigen manchmal mehr Zeit
-    testTimeout: 10000
+    testTimeout: 30000,
+    
+    // globalSetup statt environmentMatchGlobs verwenden
+    globalSetup: './src/integration/integration.setup.js'
   },
   server: {
     port: 3000
