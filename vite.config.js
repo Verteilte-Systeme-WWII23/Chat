@@ -9,7 +9,16 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.js'],
-      exclude: ['src/public/**']
+      exclude: [
+        'src/integration/integration.setup.js',
+        'src/integration/setup.js',
+        'src/integration/test-mocks.js',
+        'vitest.setup.js',
+        '**/node_modules/**',
+        '**/*.test.js',
+        '**/*.spec.js',
+        '**/*.config.js'
+      ]
     },
     deps: {
       optimizer: {
