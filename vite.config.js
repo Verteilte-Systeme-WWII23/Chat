@@ -4,16 +4,14 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    setupFiles: ['./vitest.setup.js'],
+    setupFiles: ['./test/setup/vitest.setup.js'],
+    testTimeout: 30000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.js'],
       exclude: [
-        'src/integration/integration.setup.js',
-        'src/integration/setup.js',
-        'src/integration/test-mocks.js',
-        'vitest.setup.js',
+        'src/public/**',
         '**/node_modules/**',
         '**/*.test.js',
         '**/*.spec.js',
@@ -26,11 +24,7 @@ export default defineConfig({
           include: ['ws']
         }
       }
-    },
-    testTimeout: 30000,
-    
-    // globalSetup statt environmentMatchGlobs verwenden
-    globalSetup: './src/integration/integration.setup.js'
+    }
   },
   server: {
     port: 3000

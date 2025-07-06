@@ -2,23 +2,15 @@ import { describe, test, expect, beforeAll, afterAll, beforeEach, vi } from 'vit
 import fetch from 'node-fetch';
 import WebSocket from 'ws';
 
-// Mock für dotenv und Umgebungsvariablen
-vi.mock('dotenv', () => ({
-  default: {
-    config: vi.fn()
-  },
-  config: vi.fn()
-}));
-
 // Setze ADMIN_PASSWORD direkt im Code
 vi.stubEnv('ADMIN_PASSWORD', 'test_password');
 
 // Mocks für abhängige Module
-vi.mock('./wsHandlers.js', () => ({
+vi.mock('../../src/wsHandlers.js', () => ({
   handleConnection: vi.fn()
 }));
 
-vi.mock('./userManager.js', () => ({
+vi.mock('../../src/userManager.js', () => ({
   getAllUsers: vi.fn(),
   getBannedIps: vi.fn(),
   banIp: vi.fn(),
@@ -26,9 +18,9 @@ vi.mock('./userManager.js', () => ({
 }));
 
 // Importiere den Server erst nach den Mocks
-import server from './server.js';
-import { handleConnection } from './wsHandlers.js';
-import { getAllUsers, getBannedIps, banIp, unBanIp } from './userManager.js';
+import server from '../../src/server.js';
+import { handleConnection } from '../../src/wsHandlers.js';
+import { getAllUsers, getBannedIps, banIp, unBanIp } from '../../src/userManager.js';
 
 let port;
 let baseUrl;

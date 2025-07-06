@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import { getAIResponse } from './ai.js';
+import { getAIResponse } from '../../src/ai.js';
 
-vi.mock('./ai.js', () => ({
+vi.mock('../../src/ai.js', () => ({
   getAIResponse: vi.fn()
 }));
 

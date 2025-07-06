@@ -1,19 +1,19 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
-import { addUser } from '../userManager.js';
-import { createAIChatForUser, addMessageToChat, getChat } from '../chatManager.js';
+import { addUser } from '../../src/userManager.js';
+import { createAIChatForUser, addMessageToChat, getChat } from '../../src/chatManager.js';
 import { setupApiMocks } from './test-mocks.js';
 
 setupApiMocks();
 
 // AI-Modul mocken
-vi.mock('../ai.js', () => ({
+vi.mock('../../src/ai.js', () => ({
   getAIResponse: vi.fn().mockImplementation(async (query) => {
     return `AI response to: ${query}`;
   })
 }));
 
-import { getAIResponse } from '../ai.js';
-import { handleConnection } from '../wsHandlers.js';
+import { getAIResponse } from '../../src/ai.js';
+import { handleConnection } from '../../src/wsHandlers.js';
 
 describe('AI Chat Integration', () => {
   let userId, chatId, mockWs, mockReq;

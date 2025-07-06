@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import WebSocket from 'ws';
 // Korrigiere den Import
-import { createServer } from '../createServer.js';
+import { createServer } from './createServer.js';
 import { setupApiMocks } from './test-mocks.js';
 
 setupApiMocks();
