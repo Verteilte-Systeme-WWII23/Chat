@@ -1,11 +1,11 @@
 import { describe, test, expect } from 'vitest';
-import { addUser } from '../userManager.js';
+import { addUser } from '../../src/userManager.js';
 import { 
   createEmptyChatForUser, 
   addMessageToChat, 
   getChat,
   joinChatById  // Diese Funktion wurde nicht importiert
-} from '../chatManager.js';
+} from '../../src/chatManager.js';
 import { setupApiMocks } from './test-mocks.js';
 setupApiMocks();
 describe('Chat System Integration', () => {

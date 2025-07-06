@@ -4,12 +4,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "vite",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:unit": "vitest run test/unit",
+    "test:integration": "vitest run test/integration",
     "test:coverage": "vitest run --coverage",
-    "test:integration": "cross-env NODE_ENV=test GEMINI_API_KEY=test-key ADMIN_PASSWORD=test-password vitest run --config vitest.integration.config.js src/integration"
+    "test:all": "vitest run test/"
   },
   "keywords": [],
   "author": "",

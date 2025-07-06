@@ -1,13 +1,13 @@
 import { describe, test, expect, beforeAll, afterAll, vi } from 'vitest';
 import fetch from 'node-fetch';
 import WebSocket from 'ws';
-import { createServer } from '../createServer.js';
+import { createServer } from './createServer.js';
 import { setupApiMocks } from './test-mocks.js';
-import { getAllUsers, addUser } from '../userManager.js';
+import { getAllUsers, addUser } from '../../src/userManager.js';
 
 // Wir müssen den userManager mocken, da die WebSocket-Verbindung nicht garantiert einen Benutzer erstellt
-vi.mock('../userManager.js', async () => {
-  const originalModule = await vi.importActual('../userManager.js');
+vi.mock('../../src/userManager.js', async () => {
+  const originalModule = await vi.importActual('../../src/userManager.js');
   return {
     ...originalModule,
     getAllUsers: vi.fn()

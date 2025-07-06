@@ -3,6 +3,7 @@ import { vi } from 'vitest';
 // Umgebungsvariablen für Tests vor dem Import der Module setzen
 process.env.NODE_ENV = 'test';
 process.env.ADMIN_PASSWORD = 'test_password';
+process.env.GEMINI_API_KEY = 'test-api-key';
 
 // Verhindere, dass dotenv die Umgebungsvariablen überschreibt
 vi.mock('dotenv', () => ({
