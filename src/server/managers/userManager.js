@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 
- const users = new Map();
+const users = new Map();
 users.set("AI", null);
 /*
 {
@@ -45,7 +45,7 @@ export function getBannedIps() {
 }
 
 export function banIp(ip) {
-  if(bannedIps.has(ip)) return; 
+  if (bannedIps.has(ip)) return;
 
   bannedIps.add(ip);
   for (const [id, user] of users.entries()) {
