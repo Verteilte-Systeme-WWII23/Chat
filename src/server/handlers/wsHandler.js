@@ -31,7 +31,7 @@ export function handleConnection(ws, req) {
       }
 
       // Command ausführen
-      const handler = new WSHandler(ws, userId);
+      const handler = new WS(ws, userId);
       await ConnectionManager.executeCommand(handler, data.type, data, COMMANDS);
 
     } catch (error) {

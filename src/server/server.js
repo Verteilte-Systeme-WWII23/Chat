@@ -18,14 +18,29 @@ const wss = new WebSocketServer({ server });
 // WebSocket-Verbindungen
 wss.on("connection", (ws, req) => handleConnection(ws, req));
 
-// Routes
+// API Routes
 app.use("/admin", adminRoutes);
+
+// HTML-Seiten Routes
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/pages/landing/landing.html"));
+});
+
+app.get('/admin.html', (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/pages/admin/admin.html"));
+});
+
+// Alle statischen Client-Dateien (components, styles, etc.)
+app.use(express.static(path.join(__dirname, "../client")));
 
 // Error handling
 app.use(errorHandler);
 
-// Statische Dateien
-app.use(express.static(path.join(__dirname, "../client")));
+
+
+
+
+
 
 // Server starten (nur wenn nicht im Test-Modus)
 if (config.nodeEnv !== 'test') {

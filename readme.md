@@ -15,5 +15,10 @@ Wie html bzw. css laden und gleichzeitg modular
 alle funktionen abgedeckt
 EINEN SLOT 
 Einen für server url
+ui test mit cyphrus
+
 
 in komponente adopten
+
+user ist server setup und readme
+dev ist wie kommunizieren komponeten, ablauf, sequenz, kommunikaionsmuster darstellen
