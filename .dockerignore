@@ -1,22 +1,38 @@
-# Node.js specific ignores
+# Tests ausschließen
+test/
+src/integration/
+**/*.test.js
+**/*.spec.js
+coverage/
+vitest.config.js
+vitest.integration.config.js
+
+# Entwicklungsdateien
+.git/
+.github/
+.vscode/
+.idea/
 node_modules/
 npm-debug.log
-.env
-.DS_Store
-
-# Git ignores
-.git
-.gitignore
-
-# Docker ignores
 Dockerfile
 .dockerignore
+.eslintrc*
+.prettierrc*
+.gitignore
+
+# Umgebungsvariablen und Geheimnisse
+.env*
+*.key
+*.pem
+
+# Dokumentation
+*.md
+dokumentation_*.md
 
 # Logs
 logs/
 *.log
 
-# Editor/OS specific files
-.vscode/
-.idea/
+# Temporäre Dateien
+.DS_Store
 Thumbs.db
