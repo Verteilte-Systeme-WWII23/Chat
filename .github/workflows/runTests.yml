@@ -40,4 +40,4 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # 🔑 Token mit Schreibrecht
-          publish_dir: ./coverage/lcov-report # 📂 Verzeichnis für HTML Coverage-Report
+          publish_dir: ./coverage# 📂 Verzeichnis für HTML Coverage-Report
