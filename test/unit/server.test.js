@@ -1,16 +1,16 @@
 import { describe, test, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import fetch from 'node-fetch';
 import WebSocket from 'ws';
-
+import * as wsHandler from '../../src/server/handlers/wsHandler.js';
 // Setze ADMIN_PASSWORD direkt im Code
 vi.stubEnv('ADMIN_PASSWORD', 'test_password');
-
+vi.spyOn(wsHandler, 'handleConnection');
 // Mocks für abhängige Module
-vi.mock('../../src/wsHandlers.js', () => ({
+vi.mock('../../src/server/managers/wsHandler.js', () => ({
   handleConnection: vi.fn()
 }));
 
-vi.mock('../../src/userManager.js', () => ({
+vi.mock('../../src/server/managers/userManager.js', () => ({
   getAllUsers: vi.fn(),
   getBannedIps: vi.fn(),
   banIp: vi.fn(),
@@ -18,9 +18,9 @@ vi.mock('../../src/userManager.js', () => ({
 }));
 
 // Importiere den Server erst nach den Mocks
-import server from '../../src/server.js';
-import { handleConnection } from '../../src/wsHandlers.js';
-import { getAllUsers, getBannedIps, banIp, unBanIp } from '../../src/userManager.js';
+import server from '../../src/server/server.js';
+import { handleConnection } from '../../src/server/handlers/wsHandler.js';
+import { getAllUsers, getBannedIps, banIp, unBanIp } from '../../src/server/managers/userManager.js';
 
 let port;
 let baseUrl;

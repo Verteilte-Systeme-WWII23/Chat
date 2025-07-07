@@ -1,8 +1,8 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import { handleConnection } from '../../src/wsHandlers.js';
+import { handleConnection } from '../../src/server/handlers/wsHandler.js';
 
 // Vitest bietet bessere ESM-Unterstützung für Mocks
-vi.mock('../../src/userManager.js', () => ({
+vi.mock('../../src/server/managers/userManager.js', () => ({
   addUser: vi.fn(),
   isBanned: vi.fn(),
   removeUser: vi.fn(),
@@ -11,7 +11,7 @@ vi.mock('../../src/userManager.js', () => ({
   getAllUsers: vi.fn()
 }));
 
-vi.mock('../../src/chatManager.js', () => ({
+vi.mock('../../src/server/managers/chatManager.js', () => ({
   addMessageToChat: vi.fn(),
   getChat: vi.fn(),
   getUserChats: vi.fn(),
@@ -20,14 +20,14 @@ vi.mock('../../src/chatManager.js', () => ({
   createAIChatForUser: vi.fn()
 }));
 
-vi.mock('../../src/ai.js', () => ({
+vi.mock('../../src/server/managers/ai.js', () => ({
   getAIResponse: vi.fn()
 }));
 
 // Importiere die gemockten Module
-import * as userManager from '../../src/userManager.js';
-import * as chatManager from '../../src/chatManager.js';
-import * as ai from '../../src/ai.js';
+import * as userManager from '../../src/server/managers/userManager.js';
+import * as chatManager from '../../src/server/managers/chatManager.js';
+import * as ai from '../../src/server/managers/ai.js';
 
 describe('handleConnection', () => {
   let ws;

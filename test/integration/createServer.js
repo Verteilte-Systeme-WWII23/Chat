@@ -3,8 +3,8 @@ import http from "http";
 import { WebSocketServer } from "ws";
 import path from "path";
 import { fileURLToPath } from "url";
-import { handleConnection } from "../../src/wsHandlers.js";
-import { getAllUsers, getBannedIps, banIp, unBanIp } from "../../src/userManager.js";
+import { handleConnection } from "../../src/server/handlers/wsHandler.js";
+import { getAllUsers, getBannedIps, banIp, unBanIp } from "../../src/server/managers/userManager.js";
 
 // Funktion, um einen Server zu erstellen ohne ihn zu starten
 export async function createServer() {
