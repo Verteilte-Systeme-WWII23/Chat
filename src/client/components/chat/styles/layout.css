@@ -1,0 +1,86 @@
+:host {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  width: 500px;
+  height: 500px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  background-color: white;
+  transition: all 0.3s ease;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+#main-container {
+  display: none;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  flex-direction: row;
+}
+
+#sidebar {
+  width: 200px;
+  min-width: 160px;
+  max-width: 260px;
+  background: #f6f7fa;
+  border-right: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+}
+
+#chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+}
+
+#chat-list {
+  overflow-y: auto;
+  flex: 1;
+  border-bottom: none;
+  background: #f6f7fa;
+  padding-bottom: 8px;
+}
+
+#resize-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  right: 2px;
+  bottom: 2px;
+  cursor: se-resize;
+}
+
+#resize-handle::before {
+  content: "";
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid rgba(0,0,0,0.3);
+  border-bottom: 2px solid rgba(0,0,0,0.3);
+}
