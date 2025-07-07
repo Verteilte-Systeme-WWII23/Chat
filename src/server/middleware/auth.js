@@ -2,7 +2,10 @@ import { config } from '../config/env.js';
 
 export function adminAuth(req, res, next) {
   try {
-    const { password } = req.body || {};
+    // Unterstütze sowohl body (POST) als auch query (GET) Parameter
+    const requestData = req.body || req.query || {};
+    const { password } = requestData;
+    
     if (!password || password !== config.adminPassword) {
       return res.status(401).json({ error: "Falsches Passwort" });
     }

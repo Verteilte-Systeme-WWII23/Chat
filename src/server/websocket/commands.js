@@ -11,9 +11,10 @@ export const COMMANDS = new Map([
 // Command-Validierungen
 export const COMMAND_VALIDATIONS = {
   setName: (data) => data.name?.trim(),
-  messageTo: (data) => data.chatId && data.text?.trim(),
-  getChat: (data) => data.chatId,
-  joinChatById: (data) => data.chatId,
+  messageTo: (data) => data.chatId !== undefined && data.text?.trim(),
+  // Sonderbehandlung für 0 als gültige ID, aber leere Strings ablehnen
+  getChat: (data) => data.chatId === 0 || (data.chatId !== undefined && !!data.chatId),
+  joinChatById: (data) => data.chatId === 0 || (data.chatId !== undefined && !!data.chatId),
   getUserChats: () => true,
   createEmptyChat: () => true,
 };
