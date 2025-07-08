@@ -4,13 +4,27 @@ import { ChatManager } from './managers/ChatManager.js';
 import { EventManager } from './managers/EventManager.js';
 
 export class MeinChat extends HTMLElement {
+  static get observedAttributes() { return ['server-url']; }
+  
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
     this.myName = localStorage.getItem("chatUserName") || "";
     this.myId = "";
     this.isOpen = true;
+    this.serverUrl = this.getAttribute("server-url");
   }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if(name === "server-url" && oldValue !== newValue) {
+      this.serverUrl = newValue;
+      if (this.ws) {
+        this.ws.disconnect();
+      }
+      this.initializeManagers();
+    }
+  }
+
 
   async connectedCallback() {
     await this.loadTemplate();
@@ -50,10 +64,10 @@ export class MeinChat extends HTMLElement {
 
   initializeManagers() {
     this.ui = new UIManager(this.shadowRoot);
-    this.ws = new WebSocketManager((data) => this.handleWebSocketMessage(data));
+    this.ws = new WebSocketManager((data) => this.handleWebSocketMessage(data),
+    this.serverUrl);
     this.chat = new ChatManager(this.ui, this.ws);
     this.events = new EventManager(this.ui, this.ws, this.chat);
-    
     this.ws.connect();
   }
 
