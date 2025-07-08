@@ -14,7 +14,7 @@ describe('Chat Komponente', () => {
       cy.get('#name-input').should('be.visible').type('Testuser');
       cy.get('#login-btn').click();
       
-      cy.get('#main-container').should('be.visible', { timeout: 5000 });
+      cy.get('#main-container', { timeout: 5000 }).should('be.visible');
       
       // Korrigierter Button-Name
       cy.get('#new-empty-chat-btn').should('be.visible').click();

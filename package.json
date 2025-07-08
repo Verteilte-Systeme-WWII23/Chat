@@ -13,7 +13,7 @@
     "test:all": "vitest run test/",
     "test:e2e": "cypress run --config-file test/e2e/cypress.config.js",
     "test:e2e:open": "cypress open --config-file test/e2e/cypress.config.js",
-    "test:e2e:ci": "start-server-and-test test:e2e:server http://localhost:3001 'cypress run --config-file test/e2e/cypress.config.js'",
+    "test:e2e:ci": "start-server-and-test test:e2e:server http://localhost:3000 'cypress run --config-file test/e2e/cypress.config.js'",
     "test:e2e:server": "node test/e2e/test-server.js"
   },
   "keywords": [],

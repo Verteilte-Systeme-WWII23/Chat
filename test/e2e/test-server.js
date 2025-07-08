@@ -48,7 +48,7 @@ const wss = new WebSocketServer({ server });
 wss.on('connection', (ws, req) => handleConnection(ws, req));
 
 // Server starten
-const PORT = 3001;
+const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Cypress E2E Test-Server läuft auf Port ${PORT}`);
 });
