@@ -17,6 +17,7 @@ on:
   # Bei Pull Requests auf Hauptbranches
   pull_request:
     branches: [main, master, develop, development]
+    types: [closed]
 
 permissions:
   contents: write  # Für gh-pages deployment
