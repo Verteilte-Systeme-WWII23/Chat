@@ -6,10 +6,10 @@ import {
   addMessageToChat,
   getUserChats,
   getChat
-} from '../../src/chatManager.js';
+} from '../../src/server/managers/chatManager.js';
 
 // Mocks optimieren
-vi.mock('../../src/userManager.js', () => ({
+vi.mock('../../src/server/managers/userManager.js', () => ({
   getUserName: vi.fn((userId) => {
     if (userId === 'AI') return { name: 'AI Assistant', id: 'AI' };
     return { name: `User ${userId}`, id: userId };

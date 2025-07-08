@@ -11,7 +11,7 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       include: ['src/**/*.js'],
       exclude: [
-        'src/public/**',
+        'src/client/**',
         '**/node_modules/**',
         '**/*.test.js',
         '**/*.spec.js',

@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach, vi } from 'vitest';
-import * as userManager from '../../src/userManager.js';
+import * as userManager from '../../src/server/managers/userManager.js';
 import { v4 as uuidv4 } from 'uuid';
 
 // Mock uuid to return predictable values
