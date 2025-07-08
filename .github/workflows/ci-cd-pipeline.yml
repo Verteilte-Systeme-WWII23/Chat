@@ -1,0 +1,166 @@
+name: CI/CD Pipeline
+
+on:
+  # Manuell über GitHub UI
+  workflow_dispatch:
+  
+  # Bei Push auf Hauptbranches
+  push:
+    branches: [main, master, develop, development]
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'Dockerfile'
+  
+  # Bei Pull Requests auf Hauptbranches
+  pull_request:
+    branches: [main, master, develop, development]
+
+permissions:
+  contents: write  # Für gh-pages deployment
+  packages: write  # Für Docker-Push zu ghcr.io
+
+jobs:
+  # Unit Tests mit Coverage
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests and collect coverage
+        run: npm run test:unit
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
+
+  # Integration Tests mit Coverage
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    if: ${{ success() }}  # Nur ausführen, wenn alle benötigten Jobs erfolgreich waren
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
+
+  # Zusammenführen der Coverage-Berichte
+  coverage-report:
+    name: Upload Coverage Report
+    needs: [unit-tests, integration-tests]
+    if: ${{ success() }}  # Nur ausführen, wenn alle benötigten Jobs erfolgreich waren
+  
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests and collect coverage
+        run: npm run test -- --coverage
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
+      - name: Upload unit test coverage
+        if: always()  # Immer hochladen, auch bei Fehlern
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-coverage
+          path: ./coverage
+          retention-days: 1
+
+  # E2E Tests mit Cypress
+  e2e-tests:
+    name: Cypress E2E Tests
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests]
+    # Nur ausführen, wenn Unit- und Integration-Tests erfolgreich waren
+    if: ${{ success() }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          start: node test/e2e/test-server.js
+          wait-on: http://localhost:3000
+          wait-on-timeout: 60
+          config-file: test/e2e/cypress.config.js
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          
+
+  # Docker Build und Push
+  build-and-push:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    # Nur ausführen, wenn alle Tests erfolgreich waren
+    needs: [unit-tests, integration-tests, e2e-tests]
+    # Nur für main/master und nur bei Push (keine PRs)
+    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/verteilte-systeme-wwii23/chat-app:latest
+            ghcr.io/verteilte-systeme-wwii23/chat-app:${{ github.sha }}
