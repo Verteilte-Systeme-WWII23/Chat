@@ -14,25 +14,19 @@ app.use(express.json());
 // Admin-Routen einbinden
 app.use('/admin', adminRoutes);
 
-// Absoluten Pfad zum src/client Verzeichnis ermitteln
+// Absoluten Pfad zum Projektverzeichnis ermitteln
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const clientPath = path.resolve(__dirname, '../../src/client');
+const testPath = __dirname;
 
 // Statische Dateien bereitstellen
 app.use(express.static(clientPath));
+app.use(express.static(testPath));
 
-// Root-Route für Tests
+// Root-Route auf test.html umleiten
 app.get('/', (req, res) => {
-  res.status(200).send('Cypress E2E Test Server Running');
-});
-
-// Test-Info-Route hinzufügen
-app.get('/test-info', (req, res) => {
-  res.json({
-    environment: 'cypress-e2e',
-    timestamp: new Date().toISOString()
-  });
+  res.sendFile(path.join(testPath, './test.html'));
 });
 
 // Fehlerbehandlung
@@ -45,12 +39,17 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 // WebSocket-Verbindungen behandeln
-wss.on('connection', (ws, req) => handleConnection(ws, req));
+wss.on('connection', (ws, req) => {
+  console.log('WebSocket-Verbindung hergestellt');
+  handleConnection(ws, req);
+});
 
 // Server starten
-const PORT = 3000;
+const PORT = 3001;
 server.listen(PORT, () => {
   console.log(`🚀 Cypress E2E Test-Server läuft auf Port ${PORT}`);
+  console.log(`Testseite verfügbar unter: http://localhost:${PORT}`);
+  console.log(`WebSocket-Server bereit auf: ws://localhost:${PORT}`);
 });
 
 // Sauberes Beenden

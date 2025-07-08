@@ -1,7 +1,7 @@
 describe('Chat Komponente', () => {
   beforeEach(() => {
-    // Direkt die Landing-Page besuchen
-    cy.visit('/pages/landing/landing.html');
+    // Startseite besuchen (jetzt test.html)
+    cy.visit('/');
     cy.get('#open-chat-btn').should('be.visible');
   });
 
@@ -14,26 +14,29 @@ describe('Chat Komponente', () => {
       cy.get('#name-input').should('be.visible').type('Testuser');
       cy.get('#login-btn').click();
       
-      cy.get('#main-container', { timeout: 5000 }).should('be.visible');
+      cy.get('#main-container').should('be.visible', { timeout: 5000 });
       
-      // Korrigierter Button-Name
+      // Chat erstellen
       cy.get('#new-empty-chat-btn').should('be.visible').click();
       
-      // Korrigierter Container-Name
+      // Chat-Bereich sollte sichtbar sein
       cy.get('#chat-area').should('be.visible');
       
-      // Warten bis Chat-Items erscheinen und erstes anklicken
+      // Auf das erste Chat-Element klicken
       cy.get('.chat-item').first().should('be.visible').click();
 
+      // Nachricht eingeben und senden
       cy.get('#message-input')
         .should('be.visible')
         .type('Hallo, das ist ein Test!');
       
       cy.get('#send-btn').click();
       
+      // Nachricht sollte im Chat erscheinen
       cy.get('#chat-messages')
         .should('contain', 'Hallo, das ist ein Test!');
       
+      // Warten auf die Antwort (falls KI aktiviert ist)
       cy.get('#chat-messages div.received', { timeout: 10000 })
         .should('be.visible');
     });

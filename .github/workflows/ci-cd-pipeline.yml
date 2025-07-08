@@ -128,7 +128,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           start: node test/e2e/test-server.js
-          wait-on: http://localhost:3000
+          wait-on: http://localhost:3001
           wait-on-timeout: 60
           config-file: test/e2e/cypress.config.js
         env:
