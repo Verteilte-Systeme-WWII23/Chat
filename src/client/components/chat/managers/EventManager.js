@@ -31,6 +31,7 @@ export class EventManager {
   setupHeaderEvents() {
     this.ui.getElement("close-btn").onclick = () => this.handleCloseChat();
     this.ui.getElement("admin-btn").onclick = () => this.handleOpenAdmin();
+    this.ui.getElement("toggle-sidebar").onclick = () => this.handleToggleSidebar();
   }
 
   setupDragAndResize() {
@@ -86,10 +87,18 @@ export class EventManager {
     window.addEventListener("mousemove", (e) => {
       if (isResizing) {
         const host = this.ui.shadowRoot.host;
-        const newWidth = Math.max(250, startWidth + (e.clientX - startX));
-        const newHeight = Math.max(320, startHeight + (e.clientY - startY));
+        const newWidth = Math.max(400, startWidth + (e.clientX - startX)); // Match min-width in CSS
+        const newHeight = Math.max(640, startHeight + (e.clientY - startY)); // Match min-height in CSS
         host.style.width = newWidth + "px";
         host.style.height = newHeight + "px";
+        
+        // Apply responsive layout based on component width
+        const container = this.ui.shadowRoot.getElementById("meinchat-container");
+        if (newWidth < 500) {
+          container.classList.add("responsive-layout");
+        } else {
+          container.classList.remove("responsive-layout");
+        }
       }
     });
 
@@ -103,9 +112,17 @@ export class EventManager {
     const name = this.ui.getInputValue("name-input");
     if (!name) return alert("Bitte gib einen Namen ein");
 
+    // Save the name in localStorage
+    localStorage.setItem("chatUserName", name);
+    
+    // Update the chat and UI
     this.chat.myName = name;
     this.ui.updateUserName(name);
+    
+    // Send the name to the server
     this.ws.send({ type: "setName", name });
+    
+    // Show main container
     this.ui.showMainContainer();
     this.ws.send({ type: "getUserChats" });
   }
@@ -138,5 +155,10 @@ export class EventManager {
 
   handleOpenAdmin() {
     window.open('/admin.html', '_blank');
+  }
+
+  handleToggleSidebar() {
+    const container = this.ui.shadowRoot.getElementById("meinchat-container");
+    container.classList.toggle("sidebar-compact");
   }
 }

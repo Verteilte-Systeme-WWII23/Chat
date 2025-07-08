@@ -6,6 +6,9 @@
   background: #fff;
   font-size: 1.05rem;
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-controls {
@@ -29,6 +32,8 @@
   margin-bottom: 0;
   transition: background 0.2s;
   border: none;
+  cursor: pointer;
+  min-height: 40px;
 }
 
 #new-empty-chat-btn:hover,
@@ -45,6 +50,16 @@
   margin-bottom: 0;
   background: #fff;
   box-sizing: border-box;
+  min-height: 40px;
+}
+
+#chat-list {
+  overflow-y: auto;
+  flex: 1;
+  border-bottom: none;
+  background: #f6f7fa;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
 }
 
 #chat-list > div {
@@ -76,4 +91,75 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .chat-controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+  
+  #new-empty-chat-btn {
+    flex: 1;
+  }
+  
+  #join-chat-id-input {
+    flex: 2;
+    min-width: 100px;
+  }
+  
+  #join-chat-btn {
+    flex: 1;
+  }
+  
+  #chat-list {
+    max-height: 200px; /* Fixed height for chat list on mobile */
+    overflow-y: auto;
+  }
+  
+  #sidebar {
+    max-height: 40vh; /* Limit sidebar height on mobile */
+    min-height: 150px; /* Ensure minimum visibility */
+    overflow-y: hidden; /* Container itself shouldn't scroll */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  #sidebar-toggle-btn {
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    z-index: 3;
+  }
+  
+  .sidebar-collapsed #chat-list {
+    max-height: 0;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-controls {
+    padding: 8px;
+  }
+  
+  #new-empty-chat-btn,
+  #join-chat-btn {
+    font-size: 0.9rem;
+    padding: 8px 0;
+  }
+  
+  #join-chat-id-input {
+    font-size: 0.9rem;
+  }
+  
+  #sidebar {
+    max-height: 35vh; /* Even smaller on very small screens */
+  }
 }

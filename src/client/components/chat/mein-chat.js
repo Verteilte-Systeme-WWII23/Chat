@@ -7,7 +7,7 @@ export class MeinChat extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this.myName = "";
+    this.myName = localStorage.getItem("chatUserName") || "";
     this.myId = "";
     this.isOpen = true;
   }
@@ -90,18 +90,37 @@ export class MeinChat extends HTMLElement {
 
   handleWelcome(data) {
     this.myId = data.userId;
-    this.myName = data.name || "";
+    
+    // Get saved name from localStorage if available
+    const savedName = localStorage.getItem("chatUserName");
+    
+    // Set the user ID in both places
     this.chat.myId = this.myId;
-    this.chat.myName = this.myName;
     localStorage.setItem("chatUserId", this.myId);
-
-    this.ui.updateUserName(this.myName);
-
-    if (!this.myName || this.myName.toLowerCase().startsWith("default_")) {
-      this.ui.showLoginScreen();
-    } else {
+    
+    // If we have a saved name, use it instead of server's default
+    if (savedName) {
+      this.myName = savedName;
+      this.chat.myName = savedName;
+      this.ui.updateUserName(savedName);
       this.ui.showMainContainer();
       this.ws.send({ type: "getUserChats" });
+      
+      // Make sure the server also knows our saved name
+      this.ws.send({ type: "setName", name: savedName });
+    } 
+    // Otherwise use server's name or show login if it's a default
+    else {
+      this.myName = data.name || "";
+      this.chat.myName = this.myName;
+      this.ui.updateUserName(this.myName);
+      
+      if (!this.myName || this.myName.toLowerCase().startsWith("default_")) {
+        this.ui.showLoginScreen();
+      } else {
+        this.ui.showMainContainer();
+        this.ws.send({ type: "getUserChats" });
+      }
     }
   }
 

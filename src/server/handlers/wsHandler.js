@@ -44,10 +44,4 @@ export function handleConnection(ws, req) {
       }
     }
   });
-
-  ws.on("close", () => {
-    if (userId) {
-      removeUser(userId);
-    }
-  });
 }
