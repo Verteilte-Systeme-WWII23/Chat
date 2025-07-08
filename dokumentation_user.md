@@ -1,105 +1,208 @@
-# Nutzerhandbuch – Chat Tool
 
-Herzlich willkommen zum Chat Tool!  
-Mit dieser Webanwendung kannst du in Echtzeit mit anderen Personen – **und mit einer AI** – kommunizieren. Die Anwendung unterstützt Einzel- und Gruppenchats sowie Konversationen mit einer künstlichen Intelligenz.
+# Chat Tool - Deployment Guide
 
----
+A modern, real-time web-based chat application with AI integration, built with Node.js, Express, WebSockets, and Docker.
 
-## Schnellstart
+## Features
 
-1. **Öffne die Anwendung**  
-   Rufe die Webseite auf, auf der das Chat Tool eingebunden ist.
-
-2. **Chat-Fenster starten**  
-   Klicke auf den Button **„Chat öffnen“**. Das Chatfenster erscheint am unteren Rand der Seite.
-
-3. **Anmelden**  
-   Gib deinen Namen ein und klicke auf **„Anmelden“**.  
-   Dein Name wird im Chat angezeigt und gespeichert, damit du beim nächsten Besuch wiedererkannt wirst.
+- 🚀 Real-time messaging with WebSockets
+- 🤖 AI chat integration
+- 👥 Multi-user group chats
+- 🎨 Drag & drop chat interface
+- 🛡️ Admin panel with user management
+- 🐳 Docker containerization
+- ⚡ CI/CD pipeline with GitHub Actions
 
 ---
 
-## Chats verwenden
+## Prerequisites
 
-### Chat-Liste
-
-- In der linken Seitenleiste findest du alle Chats, an denen du beteiligt bist.
-- Zu jedem Chat werden die Teilnehmer und die letzte Nachricht angezeigt.
-- Klicke auf einen Eintrag, um den Chat zu öffnen und Nachrichten zu lesen oder zu schreiben.
-
-### Chat erstellen
-
-- Klicke auf **„Neuer Chat“**.
-- Es wird ein privater Chat erstellt, in dem du weitere Teilnehmer hinzufügen kannst.
-
-### Chat beitreten
-
-- Gib eine gültige **Chat-ID** in das Feld darunter ein.
-- Klicke auf **„Beitreten“**, um einem bestehenden Chat beizutreten.
+- **Node.js** >= 18.0.0
+- **npm** >= 9.0.0
+- **Docker** >= 20.10.0 (for containerized deployment)
+- **Git** for version control
 
 ---
 
-## **Mit einer AI chatten**
+## Quick Start
 
-Du kannst direkt mit einer integrierten künstlichen Intelligenz (AI) chatten:
+### 1. Clone Repository
+```bash
+git clone <repository-url>
+cd chat-tool
+```
 
-1. **Erstelle einen neuen AI-Chat**
-   - Klicke auf **„Neuer Chat“**.
-   - In der Teilnehmerliste erscheint ein Teilnehmer mit dem Namen „AI“.
-   - Schreibe deine Nachricht wie gewohnt. Die AI wird darauf automatisch antworten.
+### 2. Install Dependencies
+```bash
+npm install
+```
 
-2. **AI-Chat erkennen**
-   - In der Chat-Liste wird dir angezeigt, wenn „AI“ ein Teilnehmer des Chats ist.
-   - Du kannst beliebig zwischen AI-Chats und normalen Nutzer-Chats wechseln.
+### 3. Development Mode
+```bash
+# Start development server with hot reload
+npm run dev
 
----
+# Server runs on http://localhost:3000
+```
 
-## Nachrichten schreiben
+### 4. Production Build
+```bash
+# Build frontend assets
+npm run build
 
-- Wähle einen Chat (mit Nutzern oder AI) aus.
-- Schreibe deine Nachricht in das Eingabefeld unten im Chatfenster.
-- Drücke **Enter** oder klicke auf das Senden-Symbol, um die Nachricht zu verschicken.
-- Deine Nachricht erscheint sofort im Chatverlauf – bei AI-Chats erscheint kurz darauf die Antwort der AI.
-
----
-
-## Zusatzfunktionen
-
-- **Chat-Fenster verschieben:**  
-  Ziehe das Chatfenster an der Kopfzeile an eine beliebige Position.
-- **Größe ändern:**  
-  Ziehe das kleine Feld unten rechts am Chatfenster, um die Größe zu verändern.
-- **Chat schließen:**  
-  Klicke auf das „×“ Symbol in der Kopfzeile, um das Chatfenster auszublenden.
-- **Admin-Bereich:**  
-  Über das 👤-Symbol gelangst du (sofern freigeschaltet) in den Admin-Bereich.
+# Start production server
+npm start
+```
 
 ---
 
-## Hinweise
+## Docker Deployment
 
-- Deine Chats und Nachrichten werden serverseitig gespeichert, solange der Server läuft.
-- Deine Benutzer-ID wird im Browser gespeichert, damit du beim nächsten Besuch direkt wieder Zugriff auf deine Chats hast.
-- Die Chat-IDs sind zufällig erzeugte Nummern, die du mit anderen teilen kannst, um sie in einen Chat einzuladen.
-- **AI-Chats sind als solche gekennzeichnet.** Du kannst jederzeit neue AI-Chats erstellen.
+### Build Docker Image
+```bash
+# Build image locally
+docker build -t chat-tool .
+
+# Run container
+docker run -p 3000:3000 chat-tool
+```
+
+### Environment Variables
+```bash
+# Optional configuration
+PORT=3000                    # Server port (default: 3000)
+NODE_ENV=production         # Environment mode
+AI_ENABLED=true            # Enable AI chat features
+```
+
+### Docker Compose
+```yaml
+version: '3.8'
+services:
+  chat-app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    restart: unless-stopped
+```
 
 ---
 
-## Häufige Fragen (FAQ)
+## CI/CD Pipeline
 
-**Wie starte ich einen Chat mit der AI?**  
-→ Klicke auf „Neuer Chat“. Im neuen Chat ist automatisch die AI als Teilnehmer dabei. Schreibe einfach deine Frage im Chatverlauf.
+### Automated Deployment
 
-**Kann ich mit der AI und anderen Nutzern gleichzeitig chatten?**  
-→ Derzeit ist ein AI-Chat ein Einzelchat mit der AI und dir. Gruppenchats mit der AI und mehreren Nutzern sind nicht vorgesehen.
+The project includes automated CI/CD with GitHub Actions:
 
-**Was kann die AI?**  
-→ Die AI beantwortet allgemeine Fragen, bietet Hilfestellung und interagiert wie ein normaler Chat-Partner.
+1. **Push to main branch** → Triggers automated build
+2. **Create release tag** → Triggers production deployment
+3. **Monitor deployment** via GitHub Actions logs
+
+### Manual Commands
+```bash
+# Run tests
+npm test
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
 
 ---
 
-## Support und Kontakt
+## Deployment Environments
 
-Bei Problemen oder Fragen wende dich bitte an den Administrator oder öffne ein Issue im GitHub-Repository des Projekts.
+### Development
+```bash
+npm run dev
+# Hot reload enabled
+# Debug logging active
+```
 
-Viel Spaß beim Chatten – auch mit der AI!
+### Production
+```bash
+docker run -p 3000:3000 chat-tool
+# Optimized build
+# Container deployment
+```
+
+---
+
+## Monitoring
+
+### Application Logs
+```bash
+# Development
+npm run dev  # Console output with detailed logs
+
+# Production
+docker logs <container-id>  # Container logs
+```
+
+### Health Checks
+- **HTTP**: `GET /` returns 200 OK
+- **WebSocket**: Connection test available
+
+---
+
+## Security Setup
+
+### Production Configuration
+- **IP Banning**: Built-in user management
+- **HTTPS**: Configure reverse proxy (nginx/Apache)
+- **Firewall**: Restrict access to port 3000
+
+### Recommended Environment Variables
+```bash
+NODE_ENV=production
+PORT=3000
+AI_ENABLED=true
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**Port already in use:**
+```bash
+PORT=3001 npm start
+```
+
+**WebSocket connection failed:**
+```bash
+# Check firewall settings
+# Verify WebSocket proxy configuration
+```
+
+**Build failures:**
+```bash
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+npm install
+```
+
+**Docker build issues:**
+```bash
+# Clean Docker cache
+docker system prune -a
+docker build --no-cache -t chat-tool .
+```
+
+---
+
+## Access Points
+
+- **Main Application**: `http://localhost:3000`
+- **Admin Panel**: `http://localhost:3000/admin.html`
+- **WebSocket**: `ws://localhost:3000`
+
+---
+
+**Ready to deploy?** Run `npm install && npm run dev` and visit `http://localhost:3000`
