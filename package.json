@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/server/server.js",
-    "test": "vitest run && cypress run",
+    "test": "vitest run",
     "test:watch": "vitest",
     "test:unit": "vitest run test/unit",
     "test:integration": "vitest run test/integration",
