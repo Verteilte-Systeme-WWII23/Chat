@@ -11,7 +11,10 @@
     "test:integration": "vitest run test/integration",
     "test:coverage": "vitest run --coverage",
     "test:all": "vitest run test/",
-    "test:e2e": "cypress run --browser chrome"
+    "test:e2e": "cypress run --config-file test/e2e/cypress.config.js",
+    "test:e2e:open": "cypress open --config-file test/e2e/cypress.config.js",
+    "test:e2e:ci": "start-server-and-test test:e2e:server http://localhost:3001 'cypress run --config-file test/e2e/cypress.config.js'",
+    "test:e2e:server": "node test/e2e/test-server.js"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +32,7 @@
     "cypress": "^14.5.1",
     "jsdom": "^26.1.0",
     "node-fetch": "^2.7.0",
+    "start-server-and-test": "^2.0.12",
     "supertest": "^7.1.2",
     "vite": "^7.0.0",
     "vitest": "^3.2.4",
