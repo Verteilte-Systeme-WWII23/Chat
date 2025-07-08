@@ -1,12 +1,13 @@
 export class WebSocketManager {
-  constructor(onMessage) {
+  constructor(onMessage, serverUrl) {
     this.socket = null;
     this.onMessage = onMessage;
+    this.serverUrl = serverUrl;
     this.myId = localStorage.getItem("chatUserId") || "";
   }
 
   connect() {
-    this.socket = new WebSocket(`ws://${location.host}`);
+    this.socket = new WebSocket(`ws://${this.serverUrl}`);
 
     this.socket.onopen = () => {
       if (this.myId) {
