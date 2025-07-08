@@ -24,3 +24,6 @@ in komponente adopten
 Was genau bei Dev und User Doku -> noch fragen
 user ist server setup und readme
 dev ist wie kommunizieren komponeten, ablauf, sequenz, kommunikaionsmuster darstellen
+
+
+e2e test mit cyphrus
