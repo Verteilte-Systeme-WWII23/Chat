@@ -140,8 +140,8 @@ jobs:
     runs-on: ubuntu-latest
     # Nur ausführen, wenn alle Tests erfolgreich waren
     needs: [unit-tests, integration-tests, e2e-tests]
-    # Nur für main/master und nur bei Push (keine PRs)
-    if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
+    # Auf main/master branch ausführen, unabhängig ob direkter Push oder PR-Merge
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
