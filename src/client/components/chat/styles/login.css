@@ -25,8 +25,6 @@
   color: var(--primary);
   font-size: min(5vw, 1.5rem);
   font-weight: var(--font-weight-bold, 600);
-  /* Keine zu kleinen Überschriften */
-  min-font-size: 1rem;
   max-width: 100%;
 }
 

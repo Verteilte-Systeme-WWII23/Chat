@@ -7,12 +7,12 @@ npm start
 
 RESPONSIVE MUSS ES SEIN
 INHERITEN -> für font und fontsize
-
+was
 Fragen:
 
 Wie html bzw. css laden und gleichzeitg modular
 alle funktionen abgedeckt
-EINEN SLOT 
+EINEN SLOT done
 Einen für server url
 ui test mit cyphrus
 
@@ -27,3 +27,7 @@ dev ist wie kommunizieren komponeten, ablauf, sequenz, kommunikaionsmuster darst
 
 
 e2e test mit cyphrus
+
+
+kommentarre
+code reviews
