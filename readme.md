@@ -10,7 +10,6 @@ INHERITEN -> für font und fontsize
 
 Fragen:
 
-Was genau bei Dev und User Doku -> noch fragen
 Wie html bzw. css laden und gleichzeitg modular
 alle funktionen abgedeckt
 EINEN SLOT 
@@ -20,5 +19,8 @@ ui test mit cyphrus
 
 in komponente adopten
 
+
+
+Was genau bei Dev und User Doku -> noch fragen
 user ist server setup und readme
 dev ist wie kommunizieren komponeten, ablauf, sequenz, kommunikaionsmuster darstellen
