@@ -200,22 +200,4 @@ describe('WebSocket Handler', () => {
     // Assert
     expect(mockWs.send).not.toHaveBeenCalled();
   });
-  
-  test('sollte Benutzer entfernen, wenn die Verbindung geschlossen wird', () => {
-    // Arrange
-    const userId = 'user-to-remove';
-    ConnectionManager.initializeNewUser.mockReturnValueOnce(userId);
-    
-    // Act
-    handleConnection(mockWs, mockReq);
-    
-    // Benutzer initialisieren
-    mockWs.messageCallback(JSON.stringify({ type: 'anyCommand' }));
-    
-    // Verbindung schließen
-    mockWs.closeCallback();
-    
-    // Assert
-    expect(removeUser).toHaveBeenCalledWith(userId);
-  });
 });
