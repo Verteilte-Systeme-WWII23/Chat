@@ -141,7 +141,10 @@ jobs:
     # Nur ausführen, wenn alle Tests erfolgreich waren
     needs: [unit-tests, integration-tests, e2e-tests]
     # Auf main/master branch ausführen, unabhängig ob direkter Push oder PR-Merge
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')) ||
+      (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && 
+      (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'master'))
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
