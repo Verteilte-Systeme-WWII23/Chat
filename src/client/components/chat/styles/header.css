@@ -49,8 +49,8 @@
 
         /* Sidebar toggle button - rectangular with rounded corners */
         &[id="toggle-sidebar"] {
-          color: white !important; /* Force white color */
-          background: none !important; /* Force transparent background */
+          color: white;
+          background: none;
           font-size: 1.2rem;
           padding: 4px 8px;
           border-radius: 4px;
@@ -63,8 +63,8 @@
 
   /* Show toggle button in responsive layout */
   .responsive-layout header .header-controls button[id="toggle-sidebar"] {
-    display: block !important;
-    color: white !important;
+    display: block;
+    color: white;
   }
 
   /* Responsive header adjustments */
@@ -75,8 +75,8 @@
 
       /* Show toggle button on mobile */
       .header-controls button[id="toggle-sidebar"] {
-        display: block !important;
-        color: white !important;
+        display: block;
+        color: white;
       }
     }
   }
@@ -97,7 +97,7 @@
         button[id="toggle-sidebar"] {
           font-size: 1.1rem;
           padding: 3px 6px;
-          color: white !important;
+          color: white;
         }
       }
     }
