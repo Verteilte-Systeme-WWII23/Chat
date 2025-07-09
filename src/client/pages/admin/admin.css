@@ -382,14 +382,6 @@ span[class*="icon"] {
 
 /* Hidden sections */
 div[style*="display: none"] {
-  display: none !important;
+  display: none;
 }
 
-/* Accessibility improvements */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
