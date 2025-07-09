@@ -185,7 +185,7 @@ export class EventManager {
   }
 
   handleOpenAdmin() {
-    window.open('/admin', '_blank');
+    window.open('/admin.html', '_blank');
   }
 
   handleToggleSidebar() {
