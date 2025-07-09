@@ -48,6 +48,27 @@ app.get("/admin.html", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/pages/admin/admin.html"));
 });
 
+
+
+app.get("/demo", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/pages/demo/index.html"));
+});
+
+app.get("/demo/portfolio", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/pages/demo/portfolio/portfolio.html"));
+});
+
+app.get("/demo/ecommerce", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/pages/demo/e-commerce/shop.html"));
+});
+
+app.get("/demo/education", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/pages/demo/education/learning.html"));
+});
+
+
+
+
 // Error Handling Middleware
 app.use(errorHandler);
 
