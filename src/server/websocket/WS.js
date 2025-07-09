@@ -33,7 +33,7 @@ export class WS {
 
     chat.participants.forEach(participant => {
       if (excludeUserId && participant.id === excludeUserId) return;
-      
+
       const user = getUser(participant.id);
       if (user?.ws?.readyState === 1) {
         user.ws.send(JSON.stringify(data));
@@ -48,12 +48,12 @@ export class WS {
       this.sendError("Chat existiert nicht.");
       return null;
     }
-    
+
     if (!chat.participants.some(p => p.id === this.userId)) {
       this.sendError("Du bist kein Teilnehmer dieses Chats.");
       return null;
     }
-    
+
     return chat;
   }
 
@@ -73,9 +73,15 @@ export class WS {
       return;
     }
 
+    const validation = this.validateMessage(text);
+    if (!validation.valid) {
+      this.sendError(validation.error);
+      return;
+    }
+
     const chat = this.validateChatAccess(chatId);
     if (!chat) return;
-    
+
     const message = addMessageToChat(chatId, this.userId, text.trim());
     const messageData = {
       type: "message",
@@ -97,7 +103,7 @@ export class WS {
     try {
       const response = await getAIResponse(text);
       const aiMessage = addMessageToChat(chatId, "AI", response);
-      
+
       this.broadcastToChat(chatId, {
         type: "message",
         chatId,
@@ -114,7 +120,7 @@ export class WS {
   async getChat({ chatId }) {
     const chat = this.validateChatAccess(chatId);
     if (!chat) return;
-    
+
     this.send({
       type: "chat",
       chatId,
@@ -167,5 +173,29 @@ export class WS {
       chatId,
       participant: { name: getUser(this.userId).name, id: this.userId }
     }, this.userId);
+  }
+
+
+  validateMessage(message) {
+    //check if message contains js or html code
+    const jsRegex = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/i;
+    const htmlRegex = /<[^>]+>/;
+    if (jsRegex.test(message) || htmlRegex.test(message)) {
+      return { valid: false, error: "Nachrichten dürfen kein JavaScript oder HTML enthalten." };
+    }
+    //check if message is empty
+    if (!message || message.trim() === "") {
+      return { valid: false, error: "Nachricht darf nicht leer sein." };
+    }
+    //check if message is too long
+    if (message.length > 500) {
+      return { valid: false, error: "Nachricht ist zu lang. Maximal 500 Zeichen erlaubt." };
+    }
+    //check if message contains only whitespace
+    if (message.trim().length === 0) {
+      return { valid: false, error: "Nachricht darf nicht nur aus Leerzeichen bestehen." };
+    }
+    // If all checks pass, return valid
+    return { valid: true };
   }
 }

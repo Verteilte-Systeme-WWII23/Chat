@@ -5,13 +5,13 @@ import { COMMANDS } from "../websocket/commands.js";
 
 export function handleConnection(ws, req) {
   const ip = ConnectionManager.getClientIP(req);
-  
+
   if (isBanned(ip)) {
     ws.send(JSON.stringify({ type: "banned", reason: "Du wurdest gesperrt." }));
     ws.close();
     return;
   }
-  
+
   let userId = null;
 
   ws.on("message", async (msg) => {
@@ -34,11 +34,12 @@ export function handleConnection(ws, req) {
     } catch (error) {
       console.error("Fehler beim Verarbeiten der Nachricht:", error);
       if (ws.readyState === 1) {
-        ws.send(JSON.stringify({ 
-          type: "error", 
-          message: "Ungültige Nachricht" 
+        ws.send(JSON.stringify({
+          type: "error",
+          message: "Ungültige Nachricht"
         }));
       }
     }
   });
 }
+
