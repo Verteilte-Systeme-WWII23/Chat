@@ -1,244 +1,432 @@
-# Chat Tool – Ausführliche Dokumentation
+
+# Chat Tool – Entwicklerdokumentation
 
 ## Übersicht
 
-Dieses Projekt ist eine moderne, webbasierte Echtzeit-Chat-Anwendung, die für den Einsatz in verteilten Systemen konzipiert wurde. Sie unterstützt Einzel- und Gruppenchats, KI-Integration, Admin-Funktionen, speichert Nachrichten serverseitig im Speicher und erlaubt eine intuitive Nutzung über eine Drag-and-Drop-fähige Oberfläche im Browser.
+Diese Dokumentation beschreibt die Architektur, Kommunikationsmuster und Sequenzabläufe der Chat-Anwendung. Sie richtet sich an Entwickler, die das System verstehen, erweitern oder debuggen möchten.
 
 ---
 
-## Dateistruktur
+## Systemarchitektur
+
+### High-Level Architektur
 
 ```
-src/
-├── chatManager.js
-├── userManager.js
-├── wsHandlers.js
-├── ai.js
-├── server.js
-├── createServer.js
-├── integration/
-│   ├── ai-chat.test.js
-│   ├── api.test.js
-│   ├── chat-system.test.js
-│   ├── websocket.test.js
-│   └── setup.js
-├── Dockerfile
-├── .dockerignore
-├── .github/
-│   └── workflows/
-│       ├── runTests.yml
-│       └── build_and_push.yml
-└── public/
-    ├── index.html
-    ├── mein-chat.js
-    ├── chat-styles.css
-    ├── admin.html
-    ├── admin.js
-    └── admin.css
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Backend       │    │   External      │
+│                 │    │                 │    │                 │
+│ ┌─────────────┐ │    │ ┌─────────────┐ │    │ ┌─────────────┐ │
+│ │ mein-chat.js│ │◄──►│ │ wsHandlers  │ │    │ │ AI Service  │ │
+│ │  (UI/UX)    │ │    │ │  (Router)   │ │    │ │ (Optional)  │ │
+│ └─────────────┘ │    │ └─────────────┘ │    │ └─────────────┘ │
+│                 │    │        │        │    │                 │
+│ ┌─────────────┐ │    │ ┌─────────────┐ │    │                 │
+│ │ admin.js    │ │◄──►│ │ chatManager │ │◄──►│                 │
+│ │ (Admin UI)  │ │    │ │  (Logic)    │ │    │                 │
+│ └─────────────┘ │    │ └─────────────┘ │    │                 │
+│                 │    │        │        │    │                 │
+│                 │    │ ┌─────────────┐ │    │                 │
+│                 │    │ │ userManager │ │    │                 │
+│                 │    │ │ (Sessions)  │ │    │                 │
+│                 │    │ └─────────────┘ │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-Alle Dateien sind für den vollständigen Betrieb der Anwendung notwendig. Nachfolgend werden sie detailliert erklärt.
+### Komponentenübersicht
+
+| Komponente | Verantwortlichkeit | Kommunikation |
+|------------|-------------------|---------------|
+| **mein-chat.js** | UI-Rendering, Event-Handling, WebSocket-Client | WebSocket zu wsHandlers |
+| **admin.js** | Admin-Interface, Benutzerverwaltung | REST-API zu Express |
+| **wsHandlers.js** | WebSocket-Message-Router | WebSocket ↔ Manager-Module |
+| **chatManager.js** | Chat-Logik, Nachrichten-Verwaltung | In-Memory Storage |
+| **userManager.js** | Benutzer-Sessions, IP-Banning | In-Memory Storage |
+| **ai.js** | KI-Integration für Chatbots | HTTP zu externen APIs |
 
 ---
 
-## 1. Frontend
+## Kommunikationsmuster
 
-### `src/public/index.html`
+### 1. WebSocket-Kommunikation (Frontend ↔ Backend)
 
-**Funktion:**  
-Der Einstiegspunkt der Anwendung und die zentrale HTML-Datei.
+```mermaid
+sequenceDiagram
+    participant UI as mein-chat.js
+    participant WS as wsHandlers.js
+    participant CM as chatManager.js
+    participant UM as userManager.js
+    
+    UI->>WS: connect()
+    WS->>UM: registerUser(name, ip)
+    UM->>WS: userId
+    WS->>UI: welcome(userId)
+    
+    UI->>WS: sendMessage(chatId, message)
+    WS->>CM: addMessage(chatId, userId, message)
+    CM->>WS: messageAdded(messageData)
+    WS->>UI: broadcast(newMessage)
+```
 
-**Wichtige Ausschnitte:**
-- Bindet das Web Component `<mein-chat>` als Chat-Oberfläche ein.
-- Ein "Chat öffnen"-Button zeigt die Chat-Komponente an.
-- Enthält kleine Beschreibung und Footer.
+### 2. REST-API-Kommunikation (Admin ↔ Backend)
 
-**Zusammenspiel:**  
-Lädt `mein-chat.js` und zeigt das Chat-Element erst nach Klick auf "Chat öffnen" an.
+```mermaid
+sequenceDiagram
+    participant Admin as admin.js
+    participant API as Express Router
+    participant UM as userManager.js
+    
+    Admin->>API: GET /api/users
+    API->>UM: getAllUsers()
+    UM->>API: userList
+    API->>Admin: JSON(users)
+    
+    Admin->>API: POST /api/ban-ip
+    API->>UM: banIP(ipAddress)
+    UM->>API: success
+    API->>Admin: 200 OK
+```
 
----
+### 3. Interne Modul-Kommunikation
 
-### `src/public/mein-chat.js`
-
-**Funktion:**  
-Implementiert das komplette Chat-UI als Custom Web Component (Shadow DOM). Steuert Darstellung, Interaktion und Kommunikation mit dem Backend via WebSocket.
-
-**Kernaufgaben:**
-- **UI Rendering:** Baut dynamisch alle UI-Elemente (Login, Sidebar, Chatliste, Nachrichtenbereich, Eingabefeld, Header, Resizing, Drag & Drop) auf.
-- **Event Handling:** Reagiert auf Useraktionen (Login, Nachricht senden, Chat erstellen/beitreten, Admin-Seite öffnen, Fenster verschieben und skalieren).
-- **WebSocket-Kommunikation:** Baut Verbindung zum Server auf, verarbeitet Server-Events (Chats, Messages, Teilnehmer, Sperren etc.).
-- **State Management:** Speichert Userdaten, aktive Chats, Teilnehmerlisten und UI-Zustand.
-- **Drag & Resize:** Das Chatfenster kann per Maus beliebig platziert und in der Größe verändert werden.
-
-**Zusammenspiel:**  
-Kommuniziert ausschließlich mit dem Server via WebSocket. Die UI wird nach jedem relevanten Event automatisch aktualisiert.
-
----
-
-### `src/public/chat-styles.css`
-
-**Funktion:**  
-Definiert das Aussehen der gesamten Chat-Komponente.  
-(Einige Beispiele: Farben, Abstände, Scroll-Verhalten, Button-Styles, Responsive Design.)
-
-**Zusammenspiel:**  
-Wird automatisch durch `mein-chat.js` in das Shadow DOM geladen, sodass das Styling nur auf die Chat-Komponente wirkt und nicht auf andere Elemente der Seite.
-
----
-
-### `src/public/admin.html` & `src/public/admin.js` & `src/public/admin.css`
-
-**Funktion:**  
-Admin-Panel für Benutzerverwaltung mit Funktionen zum Sperren/Entsperren von IP-Adressen und Benutzern.
-
-**Kernaufgaben:**
-- Übersicht über alle aktiven Benutzer
-- IP-Banning und -Entsperrung
-- Benutzer-Management und Moderation
-
-**Zusammenspiel:**  
-Separate Admin-Oberfläche, die über REST-API mit dem Backend kommuniziert.
+```mermaid
+graph TD
+    A[wsHandlers.js] --> B[chatManager.js]
+    A --> C[userManager.js]
+    B --> D[ai.js]
+    B --> C
+    
+    A --> E[WebSocket Clients]
+    F[Express Routes] --> C
+    F --> G[Static Files]
+```
 
 ---
 
-## 2. Backend
+## Sequenzdiagramme
 
-### `src/server.js`
+### Chat-Erstellung und Beitritt
 
-**Funktion:**  
-Haupteinstiegspunkt der Anwendung. Startet Express-Server und WebSocket-Server.
+```mermaid
+sequenceDiagram
+    participant U1 as User 1 (Creator)
+    participant U2 as User 2 (Joiner)
+    participant WS as wsHandlers
+    participant CM as chatManager
+    participant UM as userManager
+    
+    Note over U1,UM: Chat-Erstellung
+    U1->>WS: createChat()
+    WS->>UM: validateUser(userId)
+    UM->>WS: valid
+    WS->>CM: createNewChat(userId)
+    CM->>WS: chatId(12345)
+    WS->>U1: chatCreated(12345)
+    
+    Note over U2,UM: Chat-Beitritt
+    U2->>WS: joinChat(12345)
+    WS->>CM: addParticipant(12345, userId2)
+    CM->>WS: participantAdded
+    WS->>U1: newParticipant(user2)
+    WS->>U2: joinedChat(12345)
+```
 
-**Zusammenspiel:**  
-Orchestriert alle Backend-Komponenten und stellt HTTP- und WebSocket-Endpunkte bereit.
+### Nachrichtenübertragung
 
----
+```mermaid
+sequenceDiagram
+    participant Sender as Sender UI
+    participant Receiver as Receiver UI
+    participant WS as wsHandlers
+    participant CM as chatManager
+    participant AI as ai.js
+    
+    Sender->>WS: sendMessage(chatId, "Hello")
+    WS->>CM: addMessage(chatId, userId, "Hello")
+    CM->>WS: messageStored(messageData)
+    WS->>Receiver: newMessage(messageData)
+    WS->>Sender: messageSent(confirmation)
+    
+    alt AI Chat detected
+        CM->>AI: generateResponse("Hello")
+        AI->>CM: "Hi there! How can I help?"
+        CM->>WS: aiResponse(messageData)
+        WS->>Sender: newMessage(aiMessage)
+    end
+```
 
-### `src/createServer.js`
+### Benutzer-Authentifizierung und Session-Management
 
-**Funktion:**  
-Konfigurierbare Server-Erstellungsfunktion für verschiedene Umgebungen (Development, Testing, Production).
-
-**Zusammenspiel:**  
-Wird von `server.js` und Tests verwendet, um Server-Instanzen zu erstellen.
-
----
-
-### `src/chatManager.js`
-
-**Funktion:**  
-Verwaltet alle Chats und Nachrichten im Speicher (In-Memory) und stellt Funktionen bereit, um Chats zu erstellen, Teilnehmer zu verwalten und Nachrichten zu speichern und abzurufen.
-
-**Hauptkomponenten:**
-- **Chat-ID-Generator:** Erstellt eindeutige (fünfstellige, numerische) Chat-IDs.
-- **Chat-Erstellung:** Neue leere Chats und AI-Chats können angelegt werden.
-- **Beitreten zu Chats:** Teilnehmer können per Chat-ID beitreten.
-- **Nachrichtenverwaltung:** Nachrichten werden je Chat gespeichert, mit Zeitstempel versehen und können abgerufen werden.
-- **Chat-Übersichten:** Liefert alle Chats eines bestimmten Users, inkl. letzter Nachricht und Teilnehmer.
-
-**Zusammenspiel:**  
-Wird vom WebSocket-Server verwendet, um Anfragen aus dem Frontend zu beantworten.
-
----
-
-### `src/userManager.js`
-
-**Funktion:**  
-Verwaltet alle Benutzerinformationen, IP-Banning und Zuordnung von User-IDs zu Namen.
-
-**Hauptkomponenten:**
-- Benutzerregistrierung und -verwaltung
-- IP-Adress-Sperrung und -Entsperrung
-- Session-Management
-
-**Zusammenspiel:**  
-Wird von `chatManager.js` und `wsHandlers.js` genutzt, um Benutzer zu authentifizieren und zu verwalten.
-
----
-
-### `src/wsHandlers.js`
-
-**Funktion:**  
-Behandelt alle eingehenden WebSocket-Nachrichten und routet sie an die entsprechenden Manager-Module.
-
-**Zusammenspiel:**  
-Vermittelt zwischen WebSocket-Verbindungen und Backend-Logik (chatManager, userManager).
-
----
-
-### `src/ai.js`
-
-**Funktion:**  
-KI-Integration für automatische Chatbot-Antworten in AI-Chats.
-
-**Zusammenspiel:**  
-Wird von `chatManager.js` verwendet, um KI-Antworten zu generieren.
-
----
-
-## 3. Test-Infrastruktur
-
-### Unit-Tests (`*.test.js`)
-
-**Funktion:**  
-Jedes Backend-Modul verfügt über entsprechende Unit-Tests, die einzelne Funktionen isoliert testen.
-
-### Integration-Tests (`src/integration/`)
-
-**Funktion:**  
-Umfassende End-to-End-Tests, die das Zusammenspiel aller Komponenten testen:
-- `ai-chat.test.js` - KI-Chat-Funktionalität
-- `api.test.js` - REST-API-Endpunkte
-- `chat-system.test.js` - Chat-System-Integration
-- `websocket.test.js` - WebSocket-Kommunikation
-- Setup-Dateien für Testumgebung
+```mermaid
+sequenceDiagram
+    participant UI as Frontend
+    participant WS as wsHandlers
+    participant UM as userManager
+    participant CM as chatManager
+    
+    UI->>WS: login(username)
+    WS->>UM: checkUserExists(username)
+    UM->>WS: userExists/newUser
+    
+    alt New User
+        WS->>UM: createUser(username, ip)
+        UM->>WS: userId
+    else Existing User
+        WS->>UM: getUserId(username)
+        UM->>WS: userId
+    end
+    
+    WS->>CM: getUserChats(userId)
+    CM->>WS: chatList
+    WS->>UI: loginSuccess(userId, chatList)
+```
 
 ---
 
-## 4. Deployment & CI/CD
+## Datenstrukturen
 
-### Docker (`Dockerfile`, `.dockerignore`)
+### Chat-Datenmodell
 
-**Funktion:**  
-Container-Definition für einheitliches Deployment in verschiedenen Umgebungen.
+```javascript
+// In chatManager.js
+const chatStructure = {
+  chatId: "12345",
+  participants: ["user1", "user2"],
+  messages: [
+    {
+      id: "msg1",
+      sender: "user1",
+      content: "Hello World",
+      timestamp: "2024-01-01T10:00:00Z",
+      type: "text" // text, system, ai
+    }
+  ],
+  isAiChat: false,
+  createdAt: "2024-01-01T09:00:00Z"
+}
+```
 
-### GitHub Actions (`.github/workflows/`)
+### Benutzer-Datenmodell
 
-**Funktion:**  
-Automatisierte CI/CD-Pipeline mit Tests und Deployment:
-- `runTests.yml` - Automatische Test-Ausführung
-- `build_and_push.yml` - Build und Container-Deployment
+```javascript
+// In userManager.js
+const userStructure = {
+  userId: "user123",
+  username: "JohnDoe",
+  ipAddress: "192.168.1.1",
+  joinedAt: "2024-01-01T09:00:00Z",
+  isBanned: false,
+  activeChats: ["12345", "67890"]
+}
+```
+
+### WebSocket-Nachrichtenformat
+
+```javascript
+// Client → Server
+const clientMessage = {
+  type: "sendMessage", // createChat, joinChat, sendMessage
+  payload: {
+    chatId: "12345",
+    content: "Hello",
+    // ... weitere Daten
+  }
+}
+
+// Server → Client
+const serverMessage = {
+  type: "newMessage", // chatCreated, userJoined, messageSent
+  payload: {
+    chatId: "12345",
+    message: {
+      sender: "user1",
+      content: "Hello",
+      timestamp: "2024-01-01T10:00:00Z"
+    }
+  }
+}
+```
 
 ---
 
-## Zusammenspiel der Komponenten
+## Event-Flow-Diagramme
 
-1. **Start:**  
-   `server.js` startet Express- und WebSocket-Server, `index.html` zeigt Chat-UI.
+### Frontend-Event-Handling
 
-2. **Login:**  
-   Nutzer gibt Namen ein, `userManager.js` verwaltet Registrierung und Session.
+```mermaid
+graph TD
+    A[User Input] --> B{Event Type}
+    B -->|Login| C[validateInput]
+    B -->|Send Message| D[sendMessage]
+    B -->|Create Chat| E[createChat]
+    B -->|Join Chat| F[joinChat]
+    
+    C --> G[WebSocket.send]
+    D --> G
+    E --> G
+    F --> G
+    
+    G --> H[Server Response]
+    H --> I[updateUI]
+    I --> J[renderChatList]
+    I --> K[renderMessages]
+    I --> L[showNotification]
+```
 
-3. **Chat-Kommunikation:**  
-   WebSocket-Nachrichten werden über `wsHandlers.js` an `chatManager.js` weitergeleitet.
+### Backend-Message-Routing
 
-4. **KI-Integration:**  
-   AI-Chats nutzen `ai.js` für automatische Antworten.
-
-5. **Administration:**  
-   Admin-Panel kommuniziert über REST-API mit `userManager.js`.
+```mermaid
+graph TD
+    A[WebSocket Message] --> B[wsHandlers.js]
+    B --> C{Message Type}
+    
+    C -->|login| D[userManager.handleLogin]
+    C -->|createChat| E[chatManager.createChat]
+    C -->|joinChat| F[chatManager.joinChat]
+    C -->|sendMessage| G[chatManager.addMessage]
+    
+    D --> H[broadcastToUser]
+    E --> I[broadcastToChat]
+    F --> I
+    G --> J[broadcastToAllParticipants]
+    
+    J --> K[ai.js]
+    K --> L[generateAIResponse]
+    L --> I
+```
 
 ---
 
-## Hinweise zur Erweiterung
+## Fehlerbehandlung und Logging
 
-- **Persistenz:** Die aktuelle Implementierung speichert alle Daten im Speicher. Für produktiven Einsatz sollte eine Datenbank angebunden werden.
-- **Sicherheit:** Authentifizierung, Rechteverwaltung und Moderation sind über `userManager.js` erweiterbar.
-- **Features:** Dateiupload, Push-Benachrichtigungen, Emoji-Support etc. sind als Add-ons möglich.
+### Error-Propagation-Pattern
+
+```mermaid
+graph TD
+    A[Frontend Error] --> B[Try/Catch Block]
+    B --> C[Display User Message]
+    B --> D[Log to Console]
+    
+    E[Backend Error] --> F[Error Handler]
+    F --> G[Send Error Message]
+    F --> H[Server Log]
+    
+    G --> I[Frontend Error Display]
+    H --> J[Monitoring System]
+```
+
+### Logging-Struktur
+
+```javascript
+// Konsistente Logging-Pattern
+const logMessage = {
+  timestamp: new Date().toISOString(),
+  level: "INFO", // DEBUG, INFO, WARN, ERROR
+  component: "chatManager",
+  action: "createChat",
+  userId: "user123",
+  details: {
+    chatId: "12345",
+    participants: 2
+  }
+}
+```
 
 ---
 
-## Fazit
+## Testing-Strategien
 
-Die Anwendung besteht aus einem klaren Zusammenspiel aus Frontend (UI, Benutzerinteraktion, WebSocket-Client), Backend (Chat-, Benutzer- und KI-Management), Admin-Tools und umfassender Test-Infrastruktur. Die Modularität ermöglicht eine einfache Wartung und Erweiterung.
+### Unit-Test-Struktur
 
+```javascript
+// Beispiel: chatManager.test.js
+describe('ChatManager', () => {
+  describe('createChat', () => {
+    it('should create chat with unique ID', () => {
+      // Test Implementation
+    });
+    
+    it('should add creator as participant', () => {
+      // Test Implementation
+    });
+  });
+});
+```
+
+### Integration-Test-Flow
+
+```mermaid
+graph TD
+    A[Start Test Server] --> B[Create WebSocket Connection]
+    B --> C[Simulate User Login]
+    C --> D[Test Chat Creation]
+    D --> E[Test Message Sending]
+    E --> F[Verify AI Response]
+    F --> G[Test Admin Functions]
+    G --> H[Cleanup Test Data]
+```
+
+---
+
+## Sicherheitsarchitektur
+
+### Input-Validation-Pipeline
+
+```mermaid
+graph TD
+    A[User Input] --> B[Client-Side Validation]
+    B --> C[WebSocket Transport]
+    C --> D[Server-Side Validation]
+    D --> E[Sanitization]
+    E --> F[Business Logic]
+    F --> G[Database Storage]
+```
+
+### Rate-Limiting-Konzept
+
+```javascript
+// Implementierung in wsHandlers.js
+const rateLimiter = {
+  maxMessagesPerMinute: 30,
+  windowMs: 60000,
+  userLimits: new Map() // userId -> { count, resetTime }
+}
+```
+
+---
+
+## Deployment-Architektur
+
+### Container-Orchestrierung
+
+```yaml
+# docker-compose.yml Beispiel
+version: '3.8'
+services:
+  chat-app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+```
+
+### CI/CD-Pipeline-Flow
+
+```mermaid
+graph TD
+    A[Git Push] --> B[GitHub Actions Trigger]
+    B --> C[Install Dependencies]
+    C --> D[Run Unit Tests]
+    D --> E[Run Integration Tests]
+    E --> F[Build Docker Image]
+    F --> G[Push to Registry]
+    G --> H[Deploy to Production]
+    H --> I[Health Check]
+    I --> J[Rollback if Failed]
+```
 ---
