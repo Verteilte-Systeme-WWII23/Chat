@@ -40,7 +40,7 @@ git clone https://github.com/Verteilte-Systeme-WWII23/Chat.git
 npm install
 ```
 
-### 3. Environments & Secrets
+#### 3. Environments & Secrets
 
 ```bash
 touch .env
@@ -98,7 +98,7 @@ docker run -t -p 3000:3000 chat-app
 </script>
 
 ```
-*_NOTE_* Ein Slot für den Trigger-Button ist nicht vorgesehen, da Slots immer Teil der Komponente selbst sind. Da der Öffnen-Button jedoch nicht zur Chat-Komponente gehört und flexibel an verschiedenen Stellen der Seite eingebunden werden kann, muss dieser Button außerhalb der Komponente eigenständig erstellt und platziert werden.
+*_NOTE_* Ein Slot für den Trigger-Button ist nicht umgesetzt worden, da Slots Teil der Komponente selbst sein sollte. Da der Öffnen-Button jedoch nicht zur Chat-Komponente gehört und flexibel an verschiedenen Stellen bzw. auch mehrfach auf der Seite eingebunden werden kann, muss dieser Button außerhalb der Komponente eigenständig erstellt und platziert werden.
 
 #### 4. Contracts für Styling der Komponente
 
