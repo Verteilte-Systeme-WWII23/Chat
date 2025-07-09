@@ -137,3 +137,5 @@ dist
 
 
 cypress/*
+
+src/client/pages/demo/
