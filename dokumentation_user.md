@@ -40,7 +40,7 @@ git clone https://github.com/Verteilte-Systeme-WWII23/Chat.git
 npm install
 ```
 
-### 3. Environments & Secrets
+#### 3. Environments & Secrets
 
 ```bash
 touch .env
