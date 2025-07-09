@@ -296,43 +296,6 @@ graph TD
 
 ---
 
-## Fehlerbehandlung und Logging
-
-### Error-Propagation-Pattern
-
-```mermaid
-graph TD
-    A[Frontend Error] --> B[Try/Catch Block]
-    B --> C[Display User Message]
-    B --> D[Log to Console]
-    
-    E[Backend Error] --> F[Error Handler]
-    F --> G[Send Error Message]
-    F --> H[Server Log]
-    
-    G --> I[Frontend Error Display]
-    H --> J[Monitoring System]
-```
-
-### Logging-Struktur
-
-```javascript
-// Konsistente Logging-Pattern
-const logMessage = {
-  timestamp: new Date().toISOString(),
-  level: "INFO", // DEBUG, INFO, WARN, ERROR
-  component: "chatManager",
-  action: "createChat",
-  userId: "user123",
-  details: {
-    chatId: "12345",
-    participants: 2
-  }
-}
-```
-
----
-
 ## Testing-Strategien
 
 ### Unit-Test-Struktur
@@ -364,34 +327,6 @@ graph TD
     F --> G[Test Admin Functions]
     G --> H[Cleanup Test Data]
 ```
-
----
-
-## Sicherheitsarchitektur
-
-### Input-Validation-Pipeline
-
-```mermaid
-graph TD
-    A[User Input] --> B[Client-Side Validation]
-    B --> C[WebSocket Transport]
-    C --> D[Server-Side Validation]
-    D --> E[Sanitization]
-    E --> F[Business Logic]
-    F --> G[Database Storage]
-```
-
-### Rate-Limiting-Konzept
-
-```javascript
-// Implementierung in wsHandlers.js
-const rateLimiter = {
-  maxMessagesPerMinute: 30,
-  windowMs: 60000,
-  userLimits: new Map() // userId -> { count, resetTime }
-}
-```
-
 ---
 
 ## Deployment-Architektur
