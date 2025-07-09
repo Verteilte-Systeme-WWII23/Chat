@@ -1,43 +1,53 @@
 :root {
   /* Farben */
   --primary: #34db5b;
-  --primary-dark: #2980b9;
+  --primary-dark: #2bc250;
+  --primary-light: #4ee06a;
   --light: #ecf0f1;
-  --text: #5e4334;
+  --text: #2c3e50;
   --text-light: #7f8c8d;
+  --text-muted: #95a5a6;
   --accent: #e74c3c;
+  --background-start: #667eea;
+  --background-end: #764ba2;
+  --surface: #ffffff;
+  --border: #e1e8ed;
   
   /* Layout */
-  --shadow: 0 4px 24px rgba(0,0,0,0.15);
-  --radius: 12px;
+  --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
+  --shadow: 0 8px 32px rgba(0,0,0,0.12);
+  --shadow-heavy: 0 16px 48px rgba(0,0,0,0.15);
+  --radius-sm: 8px;
+  --radius: 16px;
+  --radius-lg: 24px;
   --spacing-xs: 0.5rem;
   --spacing-sm: 1rem;
   --spacing-md: 1.5rem;
   --spacing-lg: 2rem;
-  --spacing-xl: 2.5rem;
+  --spacing-xl: 3rem;
+  --spacing-xxl: 4rem;
   
   /* Typografie */
-  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  --font-size-base: 16px;
-  --font-size-sm: 0.9rem;
-  --font-size-md: 1rem;
-  --font-size-lg: 1.2rem;
-  --font-size-xl: 2rem;
-  --font-size-xxl: 2.5rem;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.5rem;
+  --font-size-xxl: 2rem;
+  --font-size-hero: 2.5rem;
+  --line-height-tight: 1.25;
   --line-height: 1.5;
+  --line-height-loose: 1.75;
   --font-weight-normal: 400;
+  --font-weight-medium: 500;
   --font-weight-bold: 600;
-  --letter-spacing: normal;
+  --letter-spacing: -0.01em;
   
-  /* Root-Anwendung */
-  font-family: var(--font-family);
-  font-size: var(--font-size-base);
-  line-height: var(--line-height);
-  color: var(--text);
-  font-weight: var(--font-weight-normal);
-  letter-spacing: var(--letter-spacing);
-  text-transform: none;
-  font-style: normal;
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition: 0.3s ease;
+  --transition-slow: 0.5s ease;
 }
 
 * {
@@ -46,100 +56,273 @@
   box-sizing: border-box;
 }
 
+html {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height);
+  color: var(--text);
+  font-weight: var(--font-weight-normal);
+  letter-spacing: var(--letter-spacing);
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: inherit;
-  font-size: inherit;
-  font-weight: inherit;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   min-height: 100vh;
+  background: linear-gradient(135deg, var(--background-start) 0%, var(--background-end) 100%);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md);
+  
+  /* Responsive body padding */
+  @media (max-width: 768px) {
+    padding: var(--spacing-sm);
+  }
+  
+  @media (max-width: 480px) {
+    padding: var(--spacing-xs);
+    align-items: flex-start;
+    padding-top: var(--spacing-lg);
+  }
 }
 
 main {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-heavy);
+  padding: var(--spacing-xxl);
   text-align: center;
-  padding: var(--spacing-xl);
-  border-radius: var(--radius);
-  background-color: white;
-  box-shadow: var(--shadow);
-  max-width: 90%;
-  width: 600px;
-  border: 1px solid var(--light);
-}
-
-h1 {
-  color: var(--text);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-xxl);
-  margin-bottom: var(--spacing-md);
-  position: relative;
-  display: inline-block;
-}
-
-h1::after {
-  content: "";
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background-color: var(--primary);
-  border-radius: 3px;
-}
-
-p {
-  color: var(--text-light);
-  line-height: var(--line-height);
-  margin-bottom: var(--spacing-lg);
-  font-size: var(--font-size-lg);
-}
-
-button {
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  padding: var(--spacing-sm) var(--spacing-lg);
-  border-radius: calc(var(--radius) * 2);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow);
-}
-
-button:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-2px);
-}
-
-button:active {
-  transform: translateY(0);
-}
-
-footer {
-  margin-top: var(--spacing-xl);
-  color: var(--text-light);
-  font-size: var(--font-size-sm);
-}
-
-@media (max-width: 768px) {
-  main {
-    width: 90%;
-    padding: var(--spacing-md);
+  width: 100%;
+  max-width: 600px;
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+  
+  /* Responsive main container */
+  @media (max-width: 768px) {
+    padding: var(--spacing-xl);
+    max-width: 500px;
+    border-radius: var(--radius);
   }
   
+  @media (max-width: 480px) {
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+  }
+  
+  /* Main content typography */
   h1 {
-    font-size: var(--font-size-xl);
+    color: var(--text);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-hero);
+    margin-bottom: var(--spacing-lg);
+    position: relative;
+    display: inline-block;
+    letter-spacing: -0.02em;
+    
+    /* Decorative underline */
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: 2px;
+    }
+    
+    /* Responsive h1 */
+    @media (max-width: 768px) {
+      font-size: var(--font-size-xxl);
+      margin-bottom: var(--spacing-md);
+      
+      &::after {
+        width: 60px;
+        height: 3px;
+        bottom: -10px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      font-size: var(--font-size-xl);
+      
+      &::after {
+        width: 50px;
+        bottom: -8px;
+      }
+    }
   }
   
   p {
-    font-size: var(--font-size-md);
+    color: var(--text-light);
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-loose);
+    margin-bottom: var(--spacing-xl);
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    
+    /* Responsive paragraph */
+    @media (max-width: 768px) {
+      font-size: var(--font-size-base);
+      margin-bottom: var(--spacing-lg);
+      max-width: 400px;
+    }
+    
+    @media (max-width: 480px) {
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--spacing-md);
+      line-height: var(--line-height);
+    }
   }
   
+  /* Button styling with hover states */
   button {
-    padding: calc(var(--spacing-sm) * 0.8) var(--spacing-md);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white;
+    border: none;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--radius);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--transition);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    
+    /* Hover and focus states */
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-heavy);
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    }
+    
+    &:active {
+      transform: translateY(0);
+      transition: all var(--transition-fast);
+    }
+    
+    &:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+    
+    /* Button shine effect */
+    &::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+      transform: rotate(45deg);
+      transition: all var(--transition-slow);
+      opacity: 0;
+    }
+    
+    &:hover::before {
+      animation: shine 0.6s ease-out;
+    }
+    
+    /* Responsive button */
+    @media (max-width: 768px) {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      font-size: var(--font-size-base);
+    }
+    
+    @media (max-width: 480px) {
+      padding: var(--spacing-sm) var(--spacing-md);
+      font-size: var(--font-size-sm);
+      width: 100%;
+      max-width: 200px;
+    }
+  }
+  
+  footer {
+    margin-top: var(--spacing-xl);
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-normal);
+    
+    /* Responsive footer */
+    @media (max-width: 768px) {
+      margin-top: var(--spacing-lg);
+      font-size: var(--font-size-xs);
+    }
+    
+    @media (max-width: 480px) {
+      margin-top: var(--spacing-md);
+    }
+  }
+}
+
+/* Chat component positioning */
+mein-chat {
+  /* Custom properties for chat button positioning */
+  --chat-btn-bottom: var(--spacing-lg);
+  --chat-btn-right: var(--spacing-lg);
+  
+  /* Responsive chat button positioning */
+  @media (max-width: 768px) {
+    --chat-btn-bottom: var(--spacing-md);
+    --chat-btn-right: var(--spacing-md);
+  }
+  
+  @media (max-width: 480px) {
+    --chat-btn-bottom: var(--spacing-sm);
+    --chat-btn-right: var(--spacing-sm);
+  }
+}
+
+/* Animations */
+@keyframes shine {
+  0% {
+    left: -100%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+/* Focus management for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --primary: #0066cc;
+    --primary-dark: #004499;
+    --text: #000000;
+    --text-light: #333333;
+    --border: #666666;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #1a1a1a;
+    --text: #ffffff;
+    --text-light: #cccccc;
+    --text-muted: #999999;
+    --border: #333333;
+    --background-start: #2c3e50;
+    --background-end: #34495e;
   }
 }

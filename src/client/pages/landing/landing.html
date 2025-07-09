@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chat-Anwendung</title>
     <link rel="stylesheet" href="/pages/landing/landing.css" />
-    <script type="module" src="http://141.72.13.151:8300/components/chat/mein-chat.js"></script>
+    <script
+      type="module"
+      src="http://141.72.13.151:8300/components/chat/mein-chat.js"
+    ></script>
   </head>
   <body>
     <main>
@@ -14,7 +17,7 @@
         Verbinde dich mit anderen Nutzern oder stelle Fragen an unsere KI. Deine
         Chats sind in einer schwebenden Komponente verfügbar.
       </p>
-      <button id="open-chat-btn">Chat öffnen</button>
+      <button>Chat öffnen</button>
       <footer>&copy; 2025 DHBW Chat-Anwendung</footer>
     </main>
 
@@ -29,11 +32,5 @@
         <span style="vertical-align: middle">Mein DHBW Chat</span>
       </span>
     </mein-chat>
-
-    <script>
-      document.getElementById("open-chat-btn").onclick = () => {
-        document.querySelector("mein-chat").style.display = "block";
-      };
-    </script>
   </body>
 </html>
