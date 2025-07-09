@@ -1,9 +1,8 @@
 import { describe, test, expect } from 'vitest';
-import { COMMANDS, COMMAND_VALIDATIONS } from '../../src/server/websocket/commands.js';
+import { VALID_COMMANDS, COMMAND_VALIDATIONS } from '../../src/server/websocket/commands.js';
 
 describe('WebSocket Commands Tests', () => {
-  test('sollte alle erwarteten Befehle in der COMMANDS Map enthalten', () => {
-    
+  test('sollte alle erwarteten Befehle im VALID_COMMANDS Set enthalten', () => {
     const expectedCommands = [
       'setName', 
       'messageTo', 
@@ -13,20 +12,11 @@ describe('WebSocket Commands Tests', () => {
       'joinChatById'
     ];
     
-    
     for (const cmd of expectedCommands) {
-      expect(COMMANDS.has(cmd)).toBe(true);
+      expect(VALID_COMMANDS.has(cmd)).toBe(true);
     }
     
-    
-    expect(COMMANDS.size).toBe(expectedCommands.length);
-  });
-  
-  test('sollte Werte der COMMANDS Map auf die entsprechenden Befehlsnamen gesetzt haben', () => {
-    
-    for (const [key, value] of COMMANDS.entries()) {
-      expect(value).toBe(key);
-    }
+    expect(VALID_COMMANDS.size).toBe(expectedCommands.length);
   });
 });
 
@@ -34,11 +24,11 @@ describe('Command Validations Tests', () => {
   test('setName-Validierung sollte korrekt funktionieren', () => {
     const validation = COMMAND_VALIDATIONS.setName;
     
-    
+    // Gültige Namen
     expect(validation({ name: 'TestUser' })).toBeTruthy();
     expect(validation({ name: '  John Doe  ' })).toBeTruthy();
     
-    
+    // Ungültige Namen
     expect(validation({ name: '' })).toBeFalsy();
     expect(validation({ name: '   ' })).toBeFalsy();
     expect(validation({})).toBeFalsy();
@@ -48,11 +38,12 @@ describe('Command Validations Tests', () => {
   test('messageTo-Validierung sollte korrekt funktionieren', () => {
     const validation = COMMAND_VALIDATIONS.messageTo;
     
-    
+    // Gültige Nachrichten
     expect(validation({ chatId: 'chat-123', text: 'Hello World' })).toBeTruthy();
     expect(validation({ chatId: 'chat-123', text: '  Hello  ' })).toBeTruthy();
+    expect(validation({ chatId: 0, text: 'Hello' })).toBeTruthy();
     
-    
+    // Ungültige Nachrichten
     expect(validation({ chatId: 'chat-123', text: '' })).toBeFalsy();
     expect(validation({ chatId: 'chat-123', text: '   ' })).toBeFalsy();
     expect(validation({ chatId: 'chat-123' })).toBeFalsy();
@@ -63,11 +54,12 @@ describe('Command Validations Tests', () => {
   test('getChat-Validierung sollte korrekt funktionieren', () => {
     const validation = COMMAND_VALIDATIONS.getChat;
     
-    
+    // Gültige Chat-IDs
     expect(validation({ chatId: 'chat-123' })).toBeTruthy();
-    expect(validation({ chatId: 0 })).toBeTruthy(); // Auch numerische IDs sollten gültig sein
+    expect(validation({ chatId: 0 })).toBeTruthy();
+    expect(validation({ chatId: 42 })).toBeTruthy();
     
-    
+    // Ungültige Chat-IDs
     expect(validation({ chatId: '' })).toBeFalsy();
     expect(validation({ otherField: 'value' })).toBeFalsy();
     expect(validation({})).toBeFalsy();
@@ -76,11 +68,12 @@ describe('Command Validations Tests', () => {
   test('joinChatById-Validierung sollte korrekt funktionieren', () => {
     const validation = COMMAND_VALIDATIONS.joinChatById;
     
-    
+    // Gültige Chat-IDs
     expect(validation({ chatId: 'chat-123' })).toBeTruthy();
     expect(validation({ chatId: 0 })).toBeTruthy();
+    expect(validation({ chatId: 42 })).toBeTruthy();
     
-    
+    // Ungültige Chat-IDs
     expect(validation({ chatId: '' })).toBeFalsy();
     expect(validation({ otherField: 'value' })).toBeFalsy();
     expect(validation({})).toBeFalsy();
@@ -88,7 +81,6 @@ describe('Command Validations Tests', () => {
   
   test('getUserChats-Validierung sollte immer true zurückgeben', () => {
     const validation = COMMAND_VALIDATIONS.getUserChats;
-    
     
     expect(validation({})).toBe(true);
     expect(validation({ someField: 'value' })).toBe(true);
@@ -99,25 +91,22 @@ describe('Command Validations Tests', () => {
   test('createEmptyChat-Validierung sollte immer true zurückgeben', () => {
     const validation = COMMAND_VALIDATIONS.createEmptyChat;
     
-    
     expect(validation({})).toBe(true);
     expect(validation({ someField: 'value' })).toBe(true);
     expect(validation()).toBe(true);
     expect(validation(null)).toBe(true);
   });
   
-  test('sollte für jeden Befehl in COMMANDS eine Validierungsfunktion haben', () => {
-    
-    for (const cmd of COMMANDS.keys()) {
+  test('sollte für jeden Befehl in VALID_COMMANDS eine Validierungsfunktion haben', () => {
+    for (const cmd of VALID_COMMANDS) {
       expect(COMMAND_VALIDATIONS).toHaveProperty(cmd);
       expect(typeof COMMAND_VALIDATIONS[cmd]).toBe('function');
     }
   });
   
   test('sollte keine überflüssigen Validierungsfunktionen haben', () => {
-    
     for (const validationKey in COMMAND_VALIDATIONS) {
-      expect(COMMANDS.has(validationKey)).toBe(true);
+      expect(VALID_COMMANDS.has(validationKey)).toBe(true);
     }
   });
 });
