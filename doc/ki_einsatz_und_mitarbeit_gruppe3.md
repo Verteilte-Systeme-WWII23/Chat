@@ -11,9 +11,9 @@
 
 # Aufteilung der einzelnen Teilnehmer
 
-Frontend: Luca, Felix, Raphael
-Backend: Luca, Felix, Jonas
-Testing: Jonas, Felix 
-CI/CD: Luca, Felix
-Refactoring: Luca, Felix, Jonas, Raphael
-Dokumentation: Raphael, Jonas, Luca
+- Frontend: Luca, Felix, Raphael
+- Backend: Luca, Felix, Jonas 
+- Testing: Jonas, Felix 
+- CI/CD: Luca, Felix
+- Refactoring: Luca, Felix, Jonas, Raphael
+- Dokumentation: Raphael, Jonas, Luca
