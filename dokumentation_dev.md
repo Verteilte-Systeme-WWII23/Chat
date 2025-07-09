@@ -3,7 +3,7 @@
 
 ## Übersicht
 
-Diese Dokumentation beschreibt die Architektur, Kommunikationsmuster und Sequenzabläufe der Chat-Anwendung. Sie richtet sich an Entwickler, die das System verstehen, erweitern oder debuggen möchten.
+Diese Dokumentation beschreibt die Architektur, Kommunikationsmuster und Sequenzabläufe der Chat-Anwendung. Sie dient als Ergänzung für Entwickler, die das System verstehen, erweitern oder debuggen möchten.
 
 ---
 
@@ -179,9 +179,24 @@ sequenceDiagram
 ```
 
 
-## Deployment-Architektur
+## Deployment
 
 ### CI/CD-Pipeline-Flow
 
 ![alt text](image.png)
+
+Das Deployment der Chat-Anwendung ist automatisiert und folgt dem in der Abbildung dargestellten CI/CD-Ansatz mittels GitHub-Actions.
+
+1. Automatisierte Tests:
+Bei jedem Push auf dem Main-Branch werden zuerst die Unit-Tests, dann die Integrationstests und anschließend die End-to-End-Tests (Cypress) ausgeführt. Dies stellt sicher, dass neue Änderungen keine bestehenden Funktionen brechen.
+
+2. Testabdeckung:
+Nach den Test Unit- und Integrationtests wird automatisch ein Coverage-Report erstellt und auf GitHub-Pages ([Link zum Coverage-Report](https://verteilte-systeme-wwii23.github.io/Chat/)) hochgeladen, um die Testabdeckung kontinuierlich zu überwachen.
+
+3. Containerisierung:
+Nach erfolgreichem Testlauf wird die Anwendung mit Docker gebaut. Das gebaute Docker-Image wird in ein Container-Registry (GitHub Container Registry) gepusht. Dadurch kann es einfach auf beliebigen Servern oder in der Cloud bereitgestellt werden.
+
+4. Bereitstellung:
+Das Image wird schließlich auf dem Zielserver (DHBW-Server) mittels eines Docker-Compose, bestehend aus dem Chat-App-Image und Watchtower bereitgestellt. Dabei wir ein Polling alle 60s für das neue Image durchgeführt.
+
 ---
