@@ -8,6 +8,8 @@
   cursor: move;
   user-select: none;
   border-radius: var(--radius) var(--radius) 0 0;
+  flex-shrink: 0; /* Critical: prevents header from shrinking */
+  min-height: 3rem; /* Ensures minimum height for header */
 }
 
 .header-controls {
@@ -28,6 +30,8 @@
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
+  border: none;
+  cursor: pointer;
 }
 
 #admin-btn {
@@ -37,4 +41,40 @@
 #close-btn:hover,
 #admin-btn:hover {
   background: rgba(255,255,255,0.2);
+}
+
+#toggle-sidebar {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 5px;
+  display: none;
+}
+
+/* Responsive header adjustments */
+@media (max-width: 768px) {
+  #header-bar {
+    padding: 10px 16px;
+    min-height: 2.8rem;
+  }
+  
+  #toggle-sidebar {
+    display: block;
+  }
+}
+
+@media (max-width: 480px) {
+  #header-bar {
+    padding: 8px 12px;
+    min-height: 2.5rem;
+  }
+  
+  #close-btn,
+  #admin-btn {
+    width: 24px;
+    height: 24px;
+    font-size: 1.2em;
+  }
 }

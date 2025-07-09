@@ -159,6 +159,21 @@ export class EventManager {
 
   handleToggleSidebar() {
     const container = this.ui.shadowRoot.getElementById("meinchat-container");
+    const sidebar = this.ui.shadowRoot.getElementById("sidebar");
+    const chatArea = this.ui.shadowRoot.getElementById("chat-area");
+    
+    // Toggle kompakte Sidebar
     container.classList.toggle("sidebar-compact");
+    
+    // Bessere Transition-Logik
+    if (container.classList.contains("sidebar-compact")) {
+      // Sidebar verstecken, Chat-Area maximieren
+      sidebar.style.transition = "all 0.3s ease";
+      chatArea.style.transition = "all 0.3s ease";
+    } else {
+      // Sidebar wieder anzeigen
+      sidebar.style.transition = "all 0.3s ease";
+      chatArea.style.transition = "all 0.3s ease";
+    }
   }
 }
