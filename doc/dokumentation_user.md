@@ -73,7 +73,7 @@ docker run -t -p 3000:3000 chat-app
 <!-- Chat-Komponente einbinden -->
 <script type="module" src="http://<SERVER_HOST>:<PORT>/components/chat/mein-chat.js"></script>
 ```
-*_NOTE_* Ersetze <SERVER_HOST>:<PORT> durch die Adresse deines Servers
+*_NOTE:_* Ersetze <SERVER_HOST>:<PORT> durch die Adresse deines Servers
 
 #### 2. Komponente im Body platzieren
 
@@ -85,7 +85,7 @@ docker run -t -p 3000:3000 chat-app
   </span>
 </mein-chat>
 ```
-*_NOTE_* Mittels Slot kann die Header-Zeile angepasst werden
+*_NOTE:_* Ersetze <SERVER_HOST>:<PORT> durch die Adresse deines Servers. Mittels Slot kann die Header-Zeile angepasst werden
 
 #### 3. Kompontente anzeigen (z.B. mittels Button)
 
@@ -98,7 +98,7 @@ docker run -t -p 3000:3000 chat-app
 </script>
 
 ```
-*_NOTE_* Ein Slot für den Trigger-Button ist nicht umgesetzt worden, da Slots Teil der Komponente selbst sein sollte. Da der Öffnen-Button jedoch nicht zur Chat-Komponente gehört und flexibel an verschiedenen Stellen bzw. auch mehrfach auf der Seite eingebunden werden kann, muss dieser Button außerhalb der Komponente eigenständig erstellt und platziert werden.
+*_NOTE:_* Ein Slot für den Trigger-Button ist nicht umgesetzt worden, da Slots Teil der Komponente selbst sein sollte. Da der Öffnen-Button jedoch nicht zur Chat-Komponente gehört und flexibel an verschiedenen Stellen bzw. auch mehrfach auf der Seite eingebunden werden kann, muss dieser Button außerhalb der Komponente eigenständig erstellt und platziert werden.
 
 #### 4. Contracts für Styling der Komponente
 
