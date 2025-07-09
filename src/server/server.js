@@ -51,10 +51,11 @@ app.get("/admin", (req, res) => {
 // Error Handling Middleware
 app.use(errorHandler);
 
-
-server.listen(config.port, () => {
-  console.log(`✅ Server läuft auf Port ${config.port}`);
-});
-
+// Server starten, es sei denn, wir sind im Testmodus oder das Modul wird importiert
+if (config.nodeEnv !== 'test') {
+  server.listen(config.port, () => {
+    console.log(`✅ Server läuft auf Port ${config.port}`);
+  });
+}
 
 export default server;
