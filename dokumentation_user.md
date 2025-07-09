@@ -1,208 +1,122 @@
 
-# Chat Tool - Deployment Guide
+# Chat-Komponente
 
-A modern, real-time web-based chat application with AI integration, built with Node.js, Express, WebSockets, and Docker.
+Eine moderne, webbasierte Chat-Anwendung mit Echtzeit-Kommunikation, KI-Integration, Admin-Panel und Docker-Support.
 
 ## Features
 
-- 🚀 Real-time messaging with WebSockets
-- 🤖 AI chat integration
-- 👥 Multi-user group chats
-- 🎨 Drag & drop chat interface
-- 🛡️ Admin panel with user management
-- 🐳 Docker containerization
-- ⚡ CI/CD pipeline with GitHub Actions
+- Echtzeit-Nachrichtenübertragung via WebSockets
+- KI-gestützter Chat (Google Gemini)
+- Multi-User-Gruppenchats
+- Drag & Drop Chat-Oberfläche
+- Admin-Panel zur Benutzerverwaltung
+- Bereitstellung als Docker-Container
 
 ---
 
-## Prerequisites
+## Voraussetzungen
 
-- **Node.js** >= 18.0.0
-- **npm** >= 9.0.0
-- **Docker** >= 20.10.0 (for containerized deployment)
-- **Git** for version control
+- **Node.js** ab Version 18.0.0
+- **npm** ab Version 9.0.0
+- **Docker** ab Version 20.10.0 (für Container-Deployment)
+- **Git** für die Versionsverwaltung
 
 ---
 
 ## Quick Start
 
-### 1. Clone Repository
+Die Funktionalitäten können, sofern eine Verbindung zum Server der DHBW mittels Cisco-VPN besteht, [hier](http://141.72.13.151:8300/) getestet werden.
+Um die Komponente selbst zu integrieren:
+
+### 1. Bereitstellen des Backends 
+
+#### 1. Clone Repository
 ```bash
-git clone <repository-url>
-cd chat-tool
+git clone https://github.com/Verteilte-Systeme-WWII23/Chat.git
 ```
 
-### 2. Install Dependencies
+#### 2. Install Dependencies
 ```bash
 npm install
 ```
 
-### 3. Development Mode
+### 3. Environments & Secrets
+
 ```bash
-# Start development server with hot reload
-npm run dev
-
-# Server runs on http://localhost:3000
+touch .env
+# Die File muss folgende Parameter beinhalten
+GEMINI_API_KEY = <YOUR_API_KEY> 
+ADMIN_PASSWORD = <YOUR_PASSWORD> (OPTIONAL)
+PORT = <PORT> (OPTIONAL)
 ```
+*_NOTE:_*  Ein GEMINI_API_KEY kann [hier](https://ai.google.dev/gemini-api/docs/api-key?hl=de) erhalten werden.
 
-### 4. Production Build
+#### 3. Build Container
 ```bash
-# Build frontend assets
-npm run build
-
-# Start production server
-npm start
+# Build Container
+docker build -t chat-app .      
 ```
 
----
-
-## Docker Deployment
-
-### Build Docker Image
+#### 4. Container auf dem Server starten
 ```bash
-# Build image locally
-docker build -t chat-tool .
-
-# Run container
-docker run -p 3000:3000 chat-tool
+# Run Container
+docker run -t -p 3000:3000 chat-app 
 ```
+*_NOTE:_*  Die Docker-Befehle dienen als Beispiel und können natürlich angepasst werden.
 
-### Environment Variables
-```bash
-# Optional configuration
-PORT=3000                    # Server port (default: 3000)
-NODE_ENV=production         # Environment mode
-AI_ENABLED=true            # Enable AI chat features
+
+### 2. Einbinden der Komponente in eigener Seite
+
+#### 1.Module importieren
+
+```html
+<!-- Chat-Komponente einbinden -->
+<script type="module" src="http://<SERVER_HOST>:<PORT>/components/chat/mein-chat.js"></script>
 ```
+*_NOTE_* Ersetze <SERVER_HOST>:<PORT> durch die Adresse deines Servers
 
-### Docker Compose
-```yaml
-version: '3.8'
-services:
-  chat-app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-    restart: unless-stopped
+#### 2. Komponente im Body platzieren
+
+```html
+<mein-chat server-url="<SERVER_HOST>:<PORT>">
+  <span slot="header-title">
+    <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4ac.svg" alt="Chat Icon" class="header-chat-icon" />
+    <span>Mein DHBW Chat</span>
+  </span>
+</mein-chat>
 ```
+*_NOTE_* Mittels Slot kann die Header-Zeile angepasst werden
 
----
+#### 3. Kompontente anzeigen (z.B. mittels Button)
 
-## CI/CD Pipeline
+```html
+<button id="open-chat-btn">Chat öffnen</button>
+<script>
+  document.getElementById("open-chat-btn").onclick = () => {
+    document.querySelector("mein-chat").style.display = "block";
+  };
+</script>
 
-### Automated Deployment
-
-The project includes automated CI/CD with GitHub Actions:
-
-1. **Push to main branch** → Triggers automated build
-2. **Create release tag** → Triggers production deployment
-3. **Monitor deployment** via GitHub Actions logs
-
-### Manual Commands
-```bash
-# Run tests
-npm test
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
 ```
+*_NOTE_* Ein Slot für den Trigger-Button ist nicht vorgesehen, da Slots immer Teil der Komponente selbst sind. Da der Öffnen-Button jedoch nicht zur Chat-Komponente gehört und flexibel an verschiedenen Stellen der Seite eingebunden werden kann, muss dieser Button außerhalb der Komponente eigenständig erstellt und platziert werden.
 
----
+#### 4. Contracts für Styling der Komponente
 
-## Deployment Environments
+Um das Styling der Komponente an das der Webseite anzupassen müssen folgende Varibalen in der CSS der Hauptseite gesetzt werden.
 
-### Development
-```bash
-npm run dev
-# Hot reload enabled
-# Debug logging active
+```css
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+    font-style: inherit;
+    color: var(--text);
+    text-shadow: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+
+    --surface: var(--surface, #ffffff);
+    --border: var(--border, #e1e8ed);
+    --text: var(--text, #2c3e50);
+    --primary: var(--primary, #34db5b);
 ```
-
-### Production
-```bash
-docker run -p 3000:3000 chat-tool
-# Optimized build
-# Container deployment
-```
-
----
-
-## Monitoring
-
-### Application Logs
-```bash
-# Development
-npm run dev  # Console output with detailed logs
-
-# Production
-docker logs <container-id>  # Container logs
-```
-
-### Health Checks
-- **HTTP**: `GET /` returns 200 OK
-- **WebSocket**: Connection test available
-
----
-
-## Security Setup
-
-### Production Configuration
-- **IP Banning**: Built-in user management
-- **HTTPS**: Configure reverse proxy (nginx/Apache)
-- **Firewall**: Restrict access to port 3000
-
-### Recommended Environment Variables
-```bash
-NODE_ENV=production
-PORT=3000
-AI_ENABLED=true
-```
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-**Port already in use:**
-```bash
-PORT=3001 npm start
-```
-
-**WebSocket connection failed:**
-```bash
-# Check firewall settings
-# Verify WebSocket proxy configuration
-```
-
-**Build failures:**
-```bash
-# Clear cache and reinstall
-rm -rf node_modules package-lock.json
-npm install
-```
-
-**Docker build issues:**
-```bash
-# Clean Docker cache
-docker system prune -a
-docker build --no-cache -t chat-tool .
-```
-
----
-
-## Access Points
-
-- **Main Application**: `http://localhost:3000`
-- **Admin Panel**: `http://localhost:3000/admin.html`
-- **WebSocket**: `ws://localhost:3000`
-
----
-
-**Ready to deploy?** Run `npm install && npm run dev` and visit `http://localhost:3000`
