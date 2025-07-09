@@ -302,27 +302,3 @@ mein-chat {
     transition-duration: 0.01ms !important;
   }
 }
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  :root {
-    --primary: #0066cc;
-    --primary-dark: #004499;
-    --text: #000000;
-    --text-light: #333333;
-    --border: #666666;
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --surface: #1a1a1a;
-    --text: #ffffff;
-    --text-light: #cccccc;
-    --text-muted: #999999;
-    --border: #333333;
-    --background-start: #2c3e50;
-    --background-end: #34495e;
-  }
-}

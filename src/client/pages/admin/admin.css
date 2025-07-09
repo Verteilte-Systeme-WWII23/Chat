@@ -393,34 +393,3 @@ div[style*="display: none"] {
     transition-duration: 0.01ms !important;
   }
 }
-
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  :root {
-    --primary: #000080;
-    --danger: #8B0000;
-    --success: #006400;
-    --warning: #FF8C00;
-    --border: #000000;
-  }
-  
-  button {
-    border: 2px solid currentColor;
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1a1a1a;
-    --surface: #2d2d2d;
-    --dark: #ffffff;
-    --text: #ffffff;
-    --text-light: #cccccc;
-    --border: #404040;
-  }
-  
-  tr:hover {
-    background-color: #3a3a3a;
-  }
-}
