@@ -1,13 +1,13 @@
 // Command Registry
-export const COMMANDS = new Map([
-  ['setName', 'setName'],
-  ['messageTo', 'messageTo'],
-  ['getChat', 'getChat'],
-  ['getUserChats', 'getUserChats'],
-  ['createEmptyChat', 'createEmptyChat'],
-  ['joinChatById', 'joinChatById'],
+// Valid commands registry
+export const VALID_COMMANDS = new Set([
+  'setName',
+  'messageTo',
+  'getChat',
+  'getUserChats',
+  'createEmptyChat',
+  'joinChatById',
 ]);
-
 
 export const COMMAND_VALIDATIONS = {
   setName: (data) => data.name?.trim(),

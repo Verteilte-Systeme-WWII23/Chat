@@ -1,7 +1,7 @@
 import { isBanned, removeUser } from "../managers/userManager.js";
 import { WS } from "../websocket/WS.js";
 import { ConnectionManager } from "../websocket/ConnectionManager.js";
-import { COMMANDS } from "../websocket/commands.js";
+import { VALID_COMMANDS } from "../websocket/commands.js";
 
 export function handleConnection(ws, req) {
   const ip = ConnectionManager.getClientIP(req);
@@ -29,7 +29,7 @@ export function handleConnection(ws, req) {
       }
 
       const handler = new WS(ws, userId);
-      await ConnectionManager.executeCommand(handler, data.type, data, COMMANDS);
+      await ConnectionManager.executeCommand(handler, data.type, data, VALID_COMMANDS);
 
     } catch (error) {
       console.error("Fehler beim Verarbeiten der Nachricht:", error);
