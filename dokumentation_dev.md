@@ -17,12 +17,12 @@ Diese Dokumentation beschreibt die Architektur, Kommunikationsmuster und Sequenz
 │                 │    │                 │    │                 │
 │ ┌─────────────┐ │    │ ┌─────────────┐ │    │ ┌─────────────┐ │
 │ │ mein-chat.js│ │◄──►│ │ wsHandlers  │ │    │ │ AI Service  │ │
-│ │  (UI/UX)    │ │    │ │  (Router)   │ │    │ │ (Optional)  │ │
+│ │ (Component)│  │    │ │  (Router)   │ │    │ │ (Optional)  │ │
 │ └─────────────┘ │    │ └─────────────┘ │    │ └─────────────┘ │
 │                 │    │        │        │    │                 │
 │ ┌─────────────┐ │    │ ┌─────────────┐ │    │                 │
-│ │ admin.js    │ │◄──►│ │ chatManager │ │◄──►│                 │
-│ │ (Admin UI)  │ │    │ │  (Logic)    │ │    │                 │
+│ │    admin    │ │◄──►│ │ chatManager │ │◄──►│                 │
+│ │    (Page)   │ │    │ │  (Logic)    │ │    │                 │
 │ └─────────────┘ │    │ └─────────────┘ │    │                 │
 │                 │    │        │        │    │                 │
 │                 │    │ ┌─────────────┐ │    │                 │
@@ -57,7 +57,7 @@ sequenceDiagram
     participant UM as userManager.js
     
     UI->>WS: connect()
-    WS->>UM: registerUser(name, ip)
+    WS->>UM: initializeNewUser(name, ip)
     UM->>WS: userId
     WS->>UI: welcome(userId)
     
@@ -75,29 +75,15 @@ sequenceDiagram
     participant API as Express Router
     participant UM as userManager.js
     
-    Admin->>API: GET /api/users
+    Admin->>API: GET /admin/users
     API->>UM: getAllUsers()
     UM->>API: userList
     API->>Admin: JSON(users)
     
-    Admin->>API: POST /api/ban-ip
+    Admin->>API: POST /admin/ban-ip
     API->>UM: banIP(ipAddress)
     UM->>API: success
     API->>Admin: 200 OK
-```
-
-### 3. Interne Modul-Kommunikation
-
-```mermaid
-graph TD
-    A[wsHandlers.js] --> B[chatManager.js]
-    A --> C[userManager.js]
-    B --> D[ai.js]
-    B --> C
-    
-    A --> E[WebSocket Clients]
-    F[Express Routes] --> C
-    F --> G[Static Files]
 ```
 
 ---
@@ -149,7 +135,7 @@ sequenceDiagram
     alt AI Chat detected
         CM->>AI: generateResponse("Hello")
         AI->>CM: "Hi there! How can I help?"
-        CM->>WS: aiResponse(messageData)
+        CM->>WS: messageStored(messageData)
         WS->>Sender: newMessage(aiMessage)
     end
 ```
@@ -160,208 +146,42 @@ sequenceDiagram
 sequenceDiagram
     participant UI as Frontend
     participant WS as wsHandlers
+    participant CM as ConnectionManager
     participant UM as userManager
-    participant CM as chatManager
+    participant ChatM as chatManager
     
-    UI->>WS: login(username)
-    WS->>UM: checkUserExists(username)
-    UM->>WS: userExists/newUser
+    Note over UI,ChatM: Initial Connection
+    UI->>WS: {type: "connection"}
+    WS->>CM: getClientIP(req)
+    CM->>UM: addUser(ws, ip)
+    UM->>CM: userId
+    CM->>ChatM: createAIChatForUser(userId)
+    CM->>UI: {type: "welcome", userId, name: null}
     
-    alt New User
-        WS->>UM: createUser(username, ip)
-        UM->>WS: userId
-    else Existing User
-        WS->>UM: getUserId(username)
-        UM->>WS: userId
+    Note over UI,ChatM: Set Username
+    UI->>WS: {type: "setName", name: "username"}
+    WS->>CM: executeCommand(handler, "setName", data)
+    CM->>UM: setUserName(userId, name)
+    UM->>CM: success/error
+    CM->>UI: confirmation/error
+    
+    Note over UI,ChatM: Reconnection Flow
+    UI->>WS: {type: "reconnect", userId}
+    WS->>CM: handleReconnect(ws, data)
+    CM->>UM: getUser(userId)
+    alt User Exists
+        UM->>CM: user object
+        CM->>UM: updateUserWS(userId, ws)
+        CM->>UI: {type: "welcome", userId, name}
+    else User Not Found
+        CM->>UI: null (fallback to new user)
     end
-    
-    WS->>CM: getUserChats(userId)
-    CM->>WS: chatList
-    WS->>UI: loginSuccess(userId, chatList)
 ```
 
----
-
-## Datenstrukturen
-
-### Chat-Datenmodell
-
-```javascript
-// In chatManager.js
-const chatStructure = {
-  chatId: "12345",
-  participants: ["user1", "user2"],
-  messages: [
-    {
-      id: "msg1",
-      sender: "user1",
-      content: "Hello World",
-      timestamp: "2024-01-01T10:00:00Z",
-      type: "text" // text, system, ai
-    }
-  ],
-  isAiChat: false,
-  createdAt: "2024-01-01T09:00:00Z"
-}
-```
-
-### Benutzer-Datenmodell
-
-```javascript
-// In userManager.js
-const userStructure = {
-  userId: "user123",
-  username: "JohnDoe",
-  ipAddress: "192.168.1.1",
-  joinedAt: "2024-01-01T09:00:00Z",
-  isBanned: false,
-  activeChats: ["12345", "67890"]
-}
-```
-
-### WebSocket-Nachrichtenformat
-
-```javascript
-// Client → Server
-const clientMessage = {
-  type: "sendMessage", // createChat, joinChat, sendMessage
-  payload: {
-    chatId: "12345",
-    content: "Hello",
-    // ... weitere Daten
-  }
-}
-
-// Server → Client
-const serverMessage = {
-  type: "newMessage", // chatCreated, userJoined, messageSent
-  payload: {
-    chatId: "12345",
-    message: {
-      sender: "user1",
-      content: "Hello",
-      timestamp: "2024-01-01T10:00:00Z"
-    }
-  }
-}
-```
-
----
-
-## Event-Flow-Diagramme
-
-### Frontend-Event-Handling
-
-```mermaid
-graph TD
-    A[User Input] --> B{Event Type}
-    B -->|Login| C[validateInput]
-    B -->|Send Message| D[sendMessage]
-    B -->|Create Chat| E[createChat]
-    B -->|Join Chat| F[joinChat]
-    
-    C --> G[WebSocket.send]
-    D --> G
-    E --> G
-    F --> G
-    
-    G --> H[Server Response]
-    H --> I[updateUI]
-    I --> J[renderChatList]
-    I --> K[renderMessages]
-    I --> L[showNotification]
-```
-
-### Backend-Message-Routing
-
-```mermaid
-graph TD
-    A[WebSocket Message] --> B[wsHandlers.js]
-    B --> C{Message Type}
-    
-    C -->|login| D[userManager.handleLogin]
-    C -->|createChat| E[chatManager.createChat]
-    C -->|joinChat| F[chatManager.joinChat]
-    C -->|sendMessage| G[chatManager.addMessage]
-    
-    D --> H[broadcastToUser]
-    E --> I[broadcastToChat]
-    F --> I
-    G --> J[broadcastToAllParticipants]
-    
-    J --> K[ai.js]
-    K --> L[generateAIResponse]
-    L --> I
-```
-
----
-
-## Testing-Strategien
-
-### Unit-Test-Struktur
-
-```javascript
-// Beispiel: chatManager.test.js
-describe('ChatManager', () => {
-  describe('createChat', () => {
-    it('should create chat with unique ID', () => {
-      // Test Implementation
-    });
-    
-    it('should add creator as participant', () => {
-      // Test Implementation
-    });
-  });
-});
-```
-
-### Integration-Test-Flow
-
-```mermaid
-graph TD
-    A[Start Test Server] --> B[Create WebSocket Connection]
-    B --> C[Simulate User Login]
-    C --> D[Test Chat Creation]
-    D --> E[Test Message Sending]
-    E --> F[Verify AI Response]
-    F --> G[Test Admin Functions]
-    G --> H[Cleanup Test Data]
-```
----
 
 ## Deployment-Architektur
 
-### Container-Orchestrierung
-
-```yaml
-# docker-compose.yml Beispiel
-version: '3.8'
-services:
-  chat-app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-```
-
 ### CI/CD-Pipeline-Flow
 
-```mermaid
-graph TD
-    A[Git Push] --> B[GitHub Actions Trigger]
-    B --> C[Install Dependencies]
-    C --> D[Run Unit Tests]
-    D --> E[Run Integration Tests]
-    E --> F[Build Docker Image]
-    F --> G[Push to Registry]
-    G --> H[Deploy to Production]
-    H --> I[Health Check]
-    I --> J[Rollback if Failed]
-```
+![alt text](image.png)
 ---
