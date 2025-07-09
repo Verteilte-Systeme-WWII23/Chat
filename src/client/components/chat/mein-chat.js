@@ -182,6 +182,11 @@ export class MeinChat extends HTMLElement {
     if (this.ws) {
       this.ws.disconnect();
     }
+    
+    // Cleanup für EventManager
+    if (this.events && this.events.disconnectedCallback) {
+      this.events.disconnectedCallback();
+    }
   }
 }
 

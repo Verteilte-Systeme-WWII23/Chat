@@ -1,14 +1,18 @@
-:host {
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  font-weight: inherit;
-  font-style: inherit;
-  color: var(--text);
-  text-shadow: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
+@layer base {
+  :host {
+    /* Inherited properties from parent */
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: inherit;
+    font-style: inherit;
+    color: var(--text);
+    text-shadow: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
 
-  --radius: 12px;
-  --shadow: 0 4px 24px rgba(0,0,0,0.15);
+    /* Component-specific custom properties */
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.15);
+  }
 }

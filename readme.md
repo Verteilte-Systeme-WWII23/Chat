@@ -10,11 +10,11 @@ INHERITEN -> für font und fontsize
 was
 Fragen:
 
-Wie html bzw. css laden und gleichzeitg modular
-alle funktionen abgedeckt
+Wie html bzw. css laden und gleichzeitg modular done
+alle funktionen abgedeckt done
 EINEN SLOT done
-Einen für server url
-ui test mit cyphrus
+Einen für server url done
+ui test mit cyphrus done
 
 
 in komponente adopten
@@ -26,7 +26,7 @@ user ist server setup und readme
 dev ist wie kommunizieren komponeten, ablauf, sequenz, kommunikaionsmuster darstellen
 
 
-e2e test mit cyphrus
+e2e test mit cyphrus done
 
 
 kommentarre

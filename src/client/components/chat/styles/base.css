@@ -1,21 +1,32 @@
 @import './variables.css';
 
-button {
-  cursor: pointer;
-  border: none;
-  font-family: inherit;
-}
+@layer base {
+  /* Reset and base styles for interactive elements */
+  button {
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
 
-input {
-  font-family: inherit;
-  outline: none;
-}
+  input {
+    font-family: inherit;
+    outline: none;
+  }
 
-h2, h3, h4 {
-  margin: 0;
-}
+  /* Reset heading margins */
+  h2, h3, h4 {
+    margin: 0;
+  }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  /* Smooth animation for message appearances */
+  @keyframes fadeIn {
+    from { 
+      opacity: 0; 
+      transform: translateY(5px); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0); 
+    }
+  }
 }

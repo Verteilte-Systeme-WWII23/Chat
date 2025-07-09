@@ -3,6 +3,7 @@ export class EventManager {
     this.ui = uiManager;
     this.ws = webSocketManager;
     this.chat = chatManager;
+    this.resizeObserver = null;
   }
 
   setupEventListeners() {
@@ -10,6 +11,7 @@ export class EventManager {
     this.setupChatEvents();
     this.setupHeaderEvents();
     this.setupDragAndResize();
+    this.setupResponsiveLayout();
   }
 
   setupLoginEvents() {
@@ -37,6 +39,47 @@ export class EventManager {
   setupDragAndResize() {
     this.setupDragFunctionality();
     this.setupResizeFunctionality();
+  }
+
+  // Neue Methode für responsive Layout-Überwachung
+  setupResponsiveLayout() {
+    // Initial check
+    this.checkResponsiveLayout();
+
+    // ResizeObserver für das Host-Element
+    if (window.ResizeObserver) {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.checkResponsiveLayout();
+      });
+      
+      this.resizeObserver.observe(this.ui.shadowRoot.host);
+    }
+
+    // Fallback für Browser ohne ResizeObserver
+    window.addEventListener('resize', () => {
+      this.checkResponsiveLayout();
+    });
+  }
+
+  // Prüft und wendet responsive Layout-Änderungen an
+  checkResponsiveLayout() {
+    const host = this.ui.shadowRoot.host;
+    const container = this.ui.shadowRoot.getElementById("meinchat-container");
+    const toggleButton = this.ui.getElement("toggle-sidebar");
+    const currentWidth = host.offsetWidth;
+    
+    // Responsive Layout bei Fensterbreite < 500px oder Viewport < 768px
+    const shouldBeResponsive = currentWidth < 500 || window.innerWidth <= 768;
+    
+    if (shouldBeResponsive) {
+      container.classList.add("responsive-layout");
+      toggleButton.style.display = "block";
+    } else {
+      container.classList.remove("responsive-layout");
+      // Entferne auch sidebar-compact wenn wir wieder groß werden
+      container.classList.remove("sidebar-compact");
+      toggleButton.style.display = "none";
+    }
   }
 
   setupDragFunctionality() {
@@ -87,18 +130,13 @@ export class EventManager {
     window.addEventListener("mousemove", (e) => {
       if (isResizing) {
         const host = this.ui.shadowRoot.host;
-        const newWidth = Math.max(400, startWidth + (e.clientX - startX)); // Match min-width in CSS
-        const newHeight = Math.max(640, startHeight + (e.clientY - startY)); // Match min-height in CSS
+        const newWidth = Math.max(400, startWidth + (e.clientX - startX)); // Minimum width
+        const newHeight = Math.max(700, startHeight + (e.clientY - startY)); // Minimum height
+        
         host.style.width = newWidth + "px";
         host.style.height = newHeight + "px";
         
-        // Apply responsive layout based on component width
-        const container = this.ui.shadowRoot.getElementById("meinchat-container");
-        if (newWidth < 500) {
-          container.classList.add("responsive-layout");
-        } else {
-          container.classList.remove("responsive-layout");
-        }
+        // Responsive Layout wird automatisch über ResizeObserver aktualisiert
       }
     });
 
@@ -112,17 +150,10 @@ export class EventManager {
     const name = this.ui.getInputValue("name-input");
     if (!name) return alert("Bitte gib einen Namen ein");
 
-    // Save the name in localStorage
     localStorage.setItem("chatUserName", name);
-    
-    // Update the chat and UI
     this.chat.myName = name;
     this.ui.updateUserName(name);
-    
-    // Send the name to the server
     this.ws.send({ type: "setName", name });
-    
-    // Show main container
     this.ui.showMainContainer();
     this.ws.send({ type: "getUserChats" });
   }
@@ -154,26 +185,18 @@ export class EventManager {
   }
 
   handleOpenAdmin() {
-    window.open('/admin.html', '_blank');
+    window.open('/admin', '_blank');
   }
 
   handleToggleSidebar() {
     const container = this.ui.shadowRoot.getElementById("meinchat-container");
-    const sidebar = this.ui.shadowRoot.getElementById("sidebar");
-    const chatArea = this.ui.shadowRoot.getElementById("chat-area");
-    
-    // Toggle kompakte Sidebar
     container.classList.toggle("sidebar-compact");
-    
-    // Bessere Transition-Logik
-    if (container.classList.contains("sidebar-compact")) {
-      // Sidebar verstecken, Chat-Area maximieren
-      sidebar.style.transition = "all 0.3s ease";
-      chatArea.style.transition = "all 0.3s ease";
-    } else {
-      // Sidebar wieder anzeigen
-      sidebar.style.transition = "all 0.3s ease";
-      chatArea.style.transition = "all 0.3s ease";
+  }
+
+  // Cleanup method
+  disconnectedCallback() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
     }
   }
 }

@@ -5,6 +5,7 @@ export class ChatManager {
     this.currentChatId = null;
     this.currentParticipants = [];
     this.myChats = [];
+    this.lastReadMessage = new Map(); // Speichert die letzte gelesene Nachricht pro Chat
   }
 
   displayChatList() {
@@ -26,7 +27,11 @@ export class ChatManager {
     let participants = this.flattenParticipants(chat.participants);
     const participantNames = this.getParticipantNames(participants);
     const lastMessageInfo = this.getLastMessageInfo(chat, participants);
-    const isUnread = chat.lastMessage && chat.lastMessage.from !== this.myId;
+    
+    // Chat ist ungelesen wenn: neue fremde Nachricht seit dem letzten Öffnen
+    const isUnread = chat.lastMessage && 
+                     chat.lastMessage.from !== this.myId && 
+                     this.lastReadMessage.get(chatId) !== chat.lastMessage.timestamp;
 
     chatItem.innerHTML = `
       <h4 style="${isUnread ? "font-weight: bold;" : ""}">
@@ -154,9 +159,17 @@ export class ChatManager {
     this.currentChatId = chatId;
     this.currentParticipants = participants;
 
+    // Timestamp der letzten Nachricht als gelesen markieren
+    if (chat.lastMessage) {
+      this.lastReadMessage.set(chatId, chat.lastMessage.timestamp);
+    }
+    
     this.ws.send({ type: "getChat", chatId });
     this.updateActiveChat(chatId);
     this.ui.getElement("message-input-area").style.display = "flex";
+    
+    // Chat-Liste aktualisieren um die Fettschrift zu entfernen
+    this.displayChatList();
   }
 
   updateActiveChat(chatId) {

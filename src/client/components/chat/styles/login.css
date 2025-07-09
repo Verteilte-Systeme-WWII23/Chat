@@ -1,100 +1,96 @@
-#login-screen {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: min(8%, 2.5rem);
-  text-align: center;
-  width: 100%;
-  /* Bessere Ausrichtung in jedem Containerformat */
-  box-sizing: border-box;
-  height: 100%;
-}
+@layer components {
+  /* Login screen container using semantic section targeting */
+  section:not([id="main-container"]) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: min(8%, 2.5rem);
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    height: 100%;
 
-/* Form Container für bessere Proportionen */
-#login-screen form {
-  width: min(100%, 320px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+    /* Login heading - targets h2 within login section */
+    h2 {
+      margin-bottom: min(6%, 1.5rem);
+      color: var(--primary);
+      font-size: min(5vw, 1.5rem);
+      font-weight: var(--font-weight-bold, 600);
+      max-width: 100%;
+    }
 
-#login-screen h2 {
-  margin-bottom: min(6%, 1.5rem);
-  color: var(--primary);
-  font-size: min(5vw, 1.5rem);
-  font-weight: var(--font-weight-bold, 600);
-  max-width: 100%;
-}
+    /* Login input field - targets input within login section */
+    input {
+      width: 100%;
+      padding: 0 min(4%, 15px);
+      border: 1px solid #ddd;
+      border-radius: var(--radius, 8px);
+      margin-bottom: min(5%, 1rem);
+      height: 46px;
+      font-size: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
 
-#login-screen input {
-  width: 100%;
-  padding: 0 min(4%, 15px);
-  border: 1px solid #ddd;
-  border-radius: var(--radius, 8px);
-  margin-bottom: min(5%, 1rem);
-  /* Konsistente Größe und Verhältnis */
-  height: 46px;
-  font-size: 16px; /* Verhindert iOS-Zoom */
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
+      &:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(52, 219, 91, 0.2);
+        outline: none;
+      }
+    }
 
-#login-screen input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(52, 219, 91, 0.2);
-  outline: none;
-}
+    /* Login submit button - targets button within login section */
+    button {
+      width: 100%;
+      padding: 0;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius, 8px);
+      font-weight: var(--font-weight-bold, 600);
+      height: 46px;
+      font-size: 16px;
+      transition: background 0.2s, transform 0.2s;
+      cursor: pointer;
 
-#login-screen button {
-  width: 100%;
-  padding: 0;
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius, 8px);
-  font-weight: var(--font-weight-bold, 600);
-  /* Konsistente Größe */
-  height: 46px;
-  font-size: 16px;
-  transition: background 0.2s, transform 0.2s;
-  cursor: pointer;
-}
+      &:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
 
-#login-screen button:hover {
-  background: var(--primary-dark);
-  transform: translateY(-2px);
-}
-
-#login-screen button:active {
-  transform: translateY(0);
-}
-
-/* Responsive Anpassungen - vereinfacht und konsistent */
-@media (max-width: 480px) {
-  #login-screen {
-    padding: min(6%, 1.5rem);
+      &:active {
+        transform: translateY(0);
+      }
+    }
   }
-}
 
-@media (max-height: 400px) {
-  #login-screen {
-    padding: min(4%, 0.8rem);
-    justify-content: flex-start;
-    padding-top: min(15%, 2rem);
+  /* Responsive mobile adjustments */
+  @media (max-width: 480px) {
+    section:not([id="main-container"]) {
+      padding: min(6%, 1.5rem);
+    }
   }
-  
-  #login-screen h2 {
-    font-size: 1.1rem;
-    margin-bottom: 0.8rem;
-  }
-  
-  #login-screen input {
-    height: 40px;
-    margin-bottom: 0.5rem;
-  }
-  
-  #login-screen button {
-    height: 40px;
+
+  /* Low height screen adjustments */
+  @media (max-height: 400px) {
+    section:not([id="main-container"]) {
+      padding: min(4%, 0.8rem);
+      justify-content: flex-start;
+      padding-top: min(15%, 2rem);
+
+      h2 {
+        font-size: 1.1rem;
+        margin-bottom: 0.8rem;
+      }
+
+      input {
+        height: 40px;
+        margin-bottom: 0.5rem;
+      }
+
+      button {
+        height: 40px;
+      }
+    }
   }
 }

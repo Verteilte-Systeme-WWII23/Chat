@@ -1,161 +1,264 @@
-#user-name {
-  padding: 10px 16px;
-  font-weight: 600;
-  color: var(--primary);
-  border-bottom: 1px solid #eee;
-  background: #fff;
-  font-size: 1rem;
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 0; /* Critical: prevents shrinking */
-  min-height: 2.5rem;
-}
-
-.chat-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px 12px 8px 12px;
-  border-bottom: 1px solid #eee;
-  background: #f6f7fa;
-  flex-shrink: 0; /* Critical: prevents shrinking */
-  min-height: auto;
-}
-
-#new-empty-chat-btn,
-#join-chat-btn {
-  width: 100%;
-  padding: 8px 0;
-  background: var(--primary);
-  color: white;
-  border-radius: 8px;
-  font-size: 0.98rem;
-  font-weight: 500;
-  margin-bottom: 0;
-  transition: background 0.2s;
-  border: none;
-  cursor: pointer;
-  min-height: 36px;
-
-  &:hover {
-    background: var(--primary-dark);
-  }
-}
-
-#join-chat-id-input {
-  width: 100%;
-  padding: 7px 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  margin-bottom: 0;
-  background: #fff;
-  box-sizing: border-box;
-  min-height: 36px;
-}
-
-#chat-list {
-  overflow-y: auto;
-  flex: 1;
-  border-bottom: none;
-  background: #f6f7fa;
-  padding-bottom: 8px;
-  min-height: 4rem; /* Ensures at least one chat is visible */
-  -webkit-overflow-scrolling: touch;
-
-  > div {
-    padding: 10px 16px;
-    cursor: pointer;
-    border-bottom: 1px solid #f5f5f5;
-    transition: background 0.2s;
-
-    &:hover {
-      background: #f5f5f5;
-    }
-
-    &.active {
-      background: #ecf0f1;
-      border-left: 3px solid var(--primary);
-    }
-  }
-
-  h4 {
-    margin: 0 0 4px;
-    font-size: 0.95rem;
-    font-weight: 500;
-  }
-
-  p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--text-light);
-    white-space: nowrap;
+@layer components {
+  /* Sidebar container - targets first div in main-container */
+  section[id="main-container"] > div:first-child {
+    width: 30%;
+    min-width: 160px;
+    max-width: 260px;
+    background: #f6f7fa;
+    border-right: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 0;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    min-height: 0;
     overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
 
-/* Responsive styles */
-@media (max-width: 768px) {
-  #user-name {
-    min-height: 3rem;
-    padding: 12px 16px;
+    /* User name display - first div in sidebar */
+    > div:first-child {
+      padding: 10px 16px;
+      font-weight: 600;
+      color: var(--primary);
+      border-bottom: 1px solid #eee;
+      background: #fff;
+      font-size: 1rem;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 0;
+      min-height: 2.5rem;
+    }
+
+    /* Chat control buttons container - second div in sidebar */
+    > div:nth-child(2) {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 12px 8px 12px;
+      border-bottom: 1px solid #eee;
+      background: #f6f7fa;
+      flex-shrink: 0;
+      min-height: auto;
+
+      /* Primary action buttons - buttons in controls */
+      button {
+        width: 100%;
+        padding: 8px 0;
+        background: var(--primary);
+        color: white;
+        border-radius: 8px;
+        font-size: 0.98rem;
+        font-weight: 500;
+        margin-bottom: 0;
+        transition: background 0.2s;
+        border: none;
+        cursor: pointer;
+        min-height: 36px;
+
+        &:hover {
+          background: var(--primary-dark);
+        }
+      }
+
+      /* Join chat ID input - input in controls */
+      input {
+        width: 100%;
+        padding: 7px 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        margin-bottom: 0;
+        background: #fff;
+        box-sizing: border-box;
+        min-height: 36px;
+      }
+    }
+
+    /* Chat list container - third div in sidebar */
+    > div:nth-child(3) {
+      overflow-y: auto;
+      flex: 1;
+      border-bottom: none;
+      background: #f6f7fa;
+      padding-bottom: 8px;
+      min-height: 4rem;
+      -webkit-overflow-scrolling: touch;
+
+      /* Individual chat entries */
+      > div {
+        padding: 10px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid #f5f5f5;
+        transition: background 0.2s;
+
+        &:hover {
+          background: #f5f5f5;
+        }
+
+        /* Active chat state using class when necessary */
+        &.active {
+          background: #ecf0f1;
+          border-left: 3px solid var(--primary);
+        }
+
+        /* Chat entry titles */
+        h4 {
+          margin: 0 0 4px;
+          font-size: 0.95rem;
+          font-weight: 500;
+        }
+
+        /* Chat entry descriptions */
+        p {
+          margin: 0;
+          font-size: 0.85rem;
+          color: var(--text-light);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
   }
 
-  .chat-controls {
-    flex-direction: row;
-    flex-wrap: wrap;
-    padding: 8px;
-    min-height: 4.5rem; /* Adequate space for mobile controls */
-  }
-  
-  #new-empty-chat-btn {
-    flex: 1;
-    margin-right: 4px;
-  }
-  
-  #join-chat-id-input {
-    flex: 2;
-    margin: 0 4px;
-    min-width: 100px;
-  }
-  
-  #join-chat-btn {
-    flex: 1;
-    margin-left: 4px;
-  }
-  
-  #chat-list {
-    min-height: 6rem; /* Larger for mobile touch */
-  }
-}
+  /* Responsive mobile adaptations */
+  @media (max-width: 768px) {
+    section[id="main-container"] > div:first-child {
+      width: 100%;
+      max-width: 100%;
+      height: 45%;
+      min-height: 20rem;
+      max-height: 55vh;
+      border-right: none;
+      border-bottom: 1px solid #eee;
+      position: relative;
+      overflow: hidden;
 
-@media (max-width: 480px) {
-  #user-name {
-    min-height: 2.5rem;
-    padding: 10px 16px;
+      /* User name mobile adjustments */
+      > div:first-child {
+        min-height: 3rem;
+        padding: 12px 16px;
+      }
+
+      /* Chat controls mobile layout */
+      > div:nth-child(2) {
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding: 8px;
+        min-height: 4.5rem;
+        
+        /* Mobile button layout */
+        button:first-child {
+          flex: 1;
+          margin-right: 4px;
+        }
+        
+        /* Input takes more space on mobile */
+        input {
+          flex: 2;
+          margin: 0 4px;
+          min-width: 100px;
+        }
+        
+        /* Last button alignment */
+        button:last-child {
+          flex: 1;
+          margin-left: 4px;
+        }
+      }
+      
+      /* Chat list mobile adjustments */
+      > div:nth-child(3) {
+        min-height: 6rem;
+      }
+    }
   }
 
-  .chat-controls {
-    padding: 6px;
-    min-height: 4rem;
+  /* Small mobile optimizations */
+  @media (max-width: 480px) {
+    section[id="main-container"] > div:first-child {
+      height: 40%;
+      min-height: 18rem;
+      max-height: 45vh;
+
+      /* User name small mobile adjustments */
+      > div:first-child {
+        min-height: 2.5rem;
+        padding: 10px 16px;
+      }
+
+      /* Chat controls small mobile layout */
+      > div:nth-child(2) {
+        padding: 6px;
+        min-height: 4rem;
+        
+        button {
+          font-size: 0.9rem;
+          padding: 6px 0;
+          min-height: 32px;
+        }
+        
+        input {
+          font-size: 0.9rem;
+          min-height: 32px;
+        }
+      }
+      
+      /* Chat list small mobile adjustments */
+      > div:nth-child(3) {
+        min-height: 5rem;
+      }
+    }
   }
-  
-  #new-empty-chat-btn,
-  #join-chat-btn {
-    font-size: 0.9rem;
-    padding: 6px 0;
-    min-height: 32px;
+
+  /* Responsive layout adjustments */
+  .responsive-layout {
+    section[id="main-container"] > div:first-child {
+      width: 100%;
+      max-width: 100%;
+      height: 45%;
+      min-height: 20rem;
+      max-height: 55vh;
+      border-right: none;
+      border-bottom: 1px solid #eee;
+      position: relative;
+      overflow: hidden;
+
+      > div:nth-child(3) {
+        min-height: 6rem;
+      }
+    }
+
+    /* Sidebar compact state */
+    &.sidebar-compact {
+      section[id="main-container"] > div:first-child {
+        height: 0;
+        min-height: 0;
+        max-height: 0;
+        overflow: hidden;
+        border-bottom: none;
+        padding: 0;
+        margin: 0;
+        opacity: 0;
+        transition: all 0.3s ease;
+      }
+    }
   }
-  
-  #join-chat-id-input {
-    font-size: 0.9rem;
-    min-height: 32px;
-  }
-  
-  #chat-list {
-    min-height: 5rem;
+
+  /* Mobile sidebar compact state */
+  .sidebar-compact {
+    section[id="main-container"] > div:first-child {
+      height: 0;
+      min-height: 0;
+      max-height: 0;
+      overflow: hidden;
+      border-bottom: none;
+      padding: 0;
+      margin: 0;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
   }
 }
