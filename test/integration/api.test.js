@@ -1,14 +1,13 @@
 import { describe, test, expect, beforeAll, afterAll, vi } from 'vitest';
 import fetch from 'node-fetch';
-import WebSocket from 'ws';
 import { createServer } from './helpers/createServer.js';
 import { setupApiMocks } from './helpers/test-mocks.js';
 import { getAllUsers, getBannedIps, banIp, unBanIp } from '../../src/server/managers/userManager.js';
 
-// Verbesserte Version des Auth-Mocks - vor dem setupApiMocks-Aufruf
+
 vi.mock('../../src/server/middleware/auth.js', () => ({
   adminAuth: (req, res, next) => {
-    // Nur mit dem korrekten Passwort durchlassen
+
     const { password } = req.body || {};
     
     if (password === 'admin123') {
@@ -20,7 +19,7 @@ vi.mock('../../src/server/middleware/auth.js', () => ({
   }
 }));
 
-// Validierungs-Middleware mocken
+
 vi.mock('../../src/server/middleware/validation.js', () => ({
   validateIP: (req, res, next) => {
     if (!req.body.ip) {
@@ -33,7 +32,7 @@ vi.mock('../../src/server/middleware/validation.js', () => ({
   }
 }));
 
-// Wir müssen den userManager mocken, da die WebSocket-Verbindung nicht garantiert einen Benutzer erstellt
+
 vi.mock('../../src/server/managers/userManager.js', async () => {
   const originalModule = await vi.importActual('../../src/server/managers/userManager.js');
   return {
@@ -51,10 +50,10 @@ describe('REST API Integration', () => {
   let server;
   let port;
   let baseUrl;
-  const password = 'admin123'; // Test-Passwort
+  const password = 'admin123';
   
   beforeAll(async () => {
-    // Simuliere Benutzer und gebannte IPs für Tests
+    
     const mockUsers = new Map([
       ['user1', { name: 'Test User 1', ip: '192.168.1.1' }],
       ['user2', { name: 'Test User 2', ip: '192.168.1.2' }]
@@ -64,10 +63,10 @@ describe('REST API Integration', () => {
     const mockBannedIps = new Set(['192.168.1.3']);
     getBannedIps.mockReturnValue(mockBannedIps);
     
-    // Admin-Passwort setzen
+    
     process.env.ADMIN_PASSWORD = password;
     
-    // Server starten
+    
     port = 3300 + Math.floor(Math.random() * 900);
     server = await createServer();
     await new Promise(resolve => server.listen(port, resolve));
@@ -97,7 +96,7 @@ describe('REST API Integration', () => {
   });
   
   test('sollte Benutzerliste mit richtigem Passwort zurückgeben', async () => {
-    // Debug-Ausgabe für die Passwortüberprüfung
+    
     console.log('Verwende Passwort:', password);
     console.log('Umgebungsvariable ADMIN_PASSWORD:', process.env.ADMIN_PASSWORD);
     
@@ -107,10 +106,10 @@ describe('REST API Integration', () => {
       body: JSON.stringify({ password })
     });
     
-    // Fehlerbehandlung für 401-Antworten
+    
     if (response.status === 401) {
       console.error('Authentifizierung fehlgeschlagen! Antwort:', await response.clone().text());
-      // Test überspringen statt fehlschlagen lassen
+    
       return expect(true).toBe(true);
     }
     
@@ -122,13 +121,13 @@ describe('REST API Integration', () => {
   });
   
   test.skip('sollte gesperrte IPs zurückgeben', async () => {
-    // Vor jedem Test die Mocks explizit setzen
+    
     const mockBannedIps = new Set(['192.168.1.3']);
     getBannedIps.mockReturnValue(mockBannedIps);
     
-    // Route hat ein spezifisches Format für die Antwort
+    
     const mockResponseData = [{ ip: '192.168.1.3' }];
-    // Direktes Mocken der Route-Antwort
+    
     vi.spyOn(global, 'fetch').mockImplementationOnce(() => 
       Promise.resolve({
         status: 200,
@@ -148,14 +147,14 @@ describe('REST API Integration', () => {
     expect(response.status).toBe(200);
     const bannedIps = await response.json();
     
-    // Jetzt erwarten wir genau ein Element
+    
     expect(bannedIps.length).toBeGreaterThan(0);
     expect(bannedIps[0].ip).toBe('192.168.1.3');
   });
   
   test('sollte IP sperren können', async () => {
     banIp.mockImplementation((ip) => {
-      // Simuliere erfolgreiche Sperrung
+    
       return true;
     });
     
@@ -176,7 +175,7 @@ describe('REST API Integration', () => {
   
   test('sollte IP entsperren können', async () => {
     unBanIp.mockImplementation((ip) => {
-      // Simuliere erfolgreiche Entsperrung
+    
       return true;
     });
     
@@ -196,7 +195,7 @@ describe('REST API Integration', () => {
   });
   
   test('sollte ungültige IP-Adressen ablehnen', async () => {
-    // Mock für die validateIP-Middleware einrichten
+    
     vi.mock('../../src/server/middleware/validation.js', () => ({
       validateIP: vi.fn((req, res, next) => {
         if (req.body.ip === 'invalid-ip') {
@@ -215,8 +214,8 @@ describe('REST API Integration', () => {
       })
     });
     
-    // Alternative: Wenn die Validierung in der Produktion anders implementiert ist,
-    // passen wir unsere Erwartung an
+    
+    
     if (response.status === 200) {
       console.warn('Hinweis: IP-Validierung ist weniger streng als erwartet');
       const result = await response.json();
@@ -229,7 +228,7 @@ describe('REST API Integration', () => {
   });
   
   test.skip('sollte Fehler bei fehlender IP-Adresse zurückgeben', async () => {
-    // Direktes Mocken für diesen speziellen Test
+    
     vi.spyOn(global, 'fetch').mockImplementationOnce(() => 
       Promise.resolve({
         status: 400,

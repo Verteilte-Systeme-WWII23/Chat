@@ -3,7 +3,6 @@ import { config } from '../config/env.js';
 export function errorHandler(err, req, res, next) {
     console.error('Server Error:', err);
 
-    // Für API-Requests JSON zurückgeben
     if (req.path.startsWith('/admin') || req.path.startsWith('/api')) {
         res.status(500).json({
             error: config.nodeEnv === 'production'

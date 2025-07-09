@@ -1,4 +1,4 @@
-// Command Registry - einfach erweiterbar
+// Command Registry
 export const COMMANDS = new Map([
   ['setName', 'setName'],
   ['messageTo', 'messageTo'],
@@ -8,11 +8,11 @@ export const COMMANDS = new Map([
   ['joinChatById', 'joinChatById'],
 ]);
 
-// Command-Validierungen
+
 export const COMMAND_VALIDATIONS = {
   setName: (data) => data.name?.trim(),
   messageTo: (data) => data.chatId !== undefined && data.text?.trim(),
-  // Sonderbehandlung für 0 als gültige ID, aber leere Strings ablehnen
+  // Accept 0 as a valid id but ensure no empty strings are provided
   getChat: (data) => data.chatId === 0 || (data.chatId !== undefined && !!data.chatId),
   joinChatById: (data) => data.chatId === 0 || (data.chatId !== undefined && !!data.chatId),
   getUserChats: () => true,

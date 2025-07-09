@@ -1,4 +1,4 @@
-# Tests ausschließen
+# Exclude tests 
 test/
 src/integration/
 **/*.test.js
@@ -7,7 +7,7 @@ coverage/
 vitest.config.js
 vitest.integration.config.js
 
-# Entwicklungsdateien
+# Exclude dev-files
 .git/
 .github/
 .vscode/
@@ -20,12 +20,12 @@ Dockerfile
 .prettierrc*
 .gitignore
 
-# Umgebungsvariablen und Geheimnisse
+# Envs and Secrets
 .env*
 *.key
 *.pem
 
-# Dokumentation
+# Documentation
 *.md
 dokumentation_*.md
 
@@ -33,6 +33,6 @@ dokumentation_*.md
 logs/
 *.log
 
-# Temporäre Dateien
+# Temporary Files
 .DS_Store
 Thumbs.db

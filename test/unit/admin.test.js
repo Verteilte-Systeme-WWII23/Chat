@@ -6,7 +6,7 @@ import { getAllUsers, getBannedIps, banIp, unBanIp } from '../../src/server/mana
 import { adminAuth } from '../../src/server/middleware/auth.js';
 import { validateIP } from '../../src/server/middleware/validation.js';
 
-// Mocks für die Abhängigkeiten
+
 vi.mock('../../src/server/managers/userManager.js', () => ({
   getAllUsers: vi.fn(),
   getBannedIps: vi.fn(),
@@ -26,15 +26,15 @@ describe('Admin Routes Tests', () => {
   let app;
   
   beforeEach(() => {
-    // Express-App für jeden Test neu erstellen
+
     app = express();
     app.use(express.json());
     app.use('/admin', adminRoutes);
     
-    // Mocks zurücksetzen
+
     vi.clearAllMocks();
     
-    // Standardwerte für Mocks
+
     getAllUsers.mockReturnValue(new Map([
       ['user1', { name: 'Benutzer 1', ip: '192.168.1.1' }],
       ['user2', { name: 'Benutzer 2', ip: '192.168.1.2' }],
@@ -95,7 +95,7 @@ describe('Admin Routes Tests', () => {
   });
   
   test('sollte Fehler beim Laden der Benutzer behandeln', async () => {
-    // Error simulieren
+
     getAllUsers.mockImplementation(() => {
       throw new Error('Datenbankfehler');
     });
@@ -109,7 +109,7 @@ describe('Admin Routes Tests', () => {
   });
   
   test('sollte Fehler beim Laden gesperrter IPs behandeln', async () => {
-    // Error simulieren
+
     getBannedIps.mockImplementation(() => {
       throw new Error('Datenbankfehler');
     });
@@ -123,7 +123,7 @@ describe('Admin Routes Tests', () => {
   });
   
   test('sollte Fehler beim Sperren einer IP behandeln', async () => {
-    // Error simulieren
+
     banIp.mockImplementation(() => {
       throw new Error('Sperrfehler');
     });
@@ -137,7 +137,7 @@ describe('Admin Routes Tests', () => {
   });
   
   test('sollte Fehler beim Entsperren einer IP behandeln', async () => {
-    // Error simulieren
+
     unBanIp.mockImplementation(() => {
       throw new Error('Entsperrfehler');
     });
@@ -159,7 +159,7 @@ describe('Admin Routes Tests', () => {
   });
   
   test('sollte mit leerer Benutzerliste umgehen können', async () => {
-    // Leere Map simulieren
+
     getAllUsers.mockReturnValue(new Map());
     
     const response = await request(app)
@@ -171,7 +171,7 @@ describe('Admin Routes Tests', () => {
   });
   
   test('sollte mit null-Benutzern in der Liste umgehen können', async () => {
-    // Map mit null-Werten simulieren
+
     getAllUsers.mockReturnValue(new Map([
       ['user1', null],
       ['user2', { name: 'Benutzer 2', ip: '192.168.1.2' }]

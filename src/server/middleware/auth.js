@@ -2,7 +2,7 @@ import { config } from '../config/env.js';
 
 export function adminAuth(req, res, next) {
   try {
-    // Unterstütze sowohl body (POST) als auch query (GET) Parameter
+  
     const requestData = req.body || req.query || {};
     const { password } = requestData;
     

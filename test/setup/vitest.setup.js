@@ -1,11 +1,11 @@
 import { vi } from 'vitest';
 
-// Umgebungsvariablen für Tests vor dem Import der Module setzen
+// Envs for testing
 process.env.NODE_ENV = 'test';
 process.env.ADMIN_PASSWORD = 'test_password';
 process.env.GEMINI_API_KEY = 'test-api-key';
 
-// Verhindere, dass dotenv die Umgebungsvariablen überschreibt
+
 vi.mock('dotenv', () => ({
   default: {
     config: vi.fn()
@@ -13,7 +13,7 @@ vi.mock('dotenv', () => ({
   config: vi.fn()
 }));
 
-// Globale Mocks für Tests
+// Global mocks
 global.TextEncoder = class TextEncoder {
   encode(text) {
     return Buffer.from(text);

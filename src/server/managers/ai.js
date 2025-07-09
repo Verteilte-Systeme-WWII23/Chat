@@ -6,7 +6,7 @@ if (!config.geminiApiKey) {
 }
 
 const ai = new GoogleGenAI({ apiKey: config.geminiApiKey });
-
+// Timeout of this function is provided through the official Google GenAI library
 export async function getAIResponse(query) {
   try {
     const contents = [

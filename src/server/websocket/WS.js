@@ -161,7 +161,7 @@ export class WS {
       createdAt: chat.createdAt,
     });
 
-    // Andere Teilnehmer benachrichtigen
+    // this is necessary to refresh the ui of other participants 
     this.broadcastToChat(chatId, {
       type: "participantJoined",
       chatId,

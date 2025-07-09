@@ -8,7 +8,7 @@ import {
   getChat
 } from '../../src/server/managers/chatManager.js';
 
-// Mocks optimieren
+
 vi.mock('../../src/server/managers/userManager.js', () => ({
   getUserName: vi.fn((userId) => {
     if (userId === 'AI') return { name: 'AI Assistant', id: 'AI' };
@@ -28,7 +28,7 @@ describe('ChatManager', () => {
   });
   
   afterEach(() => {
-    // Wichtig: Spies zurücksetzen, um Speicherlecks zu vermeiden
+
     if (randomSpy) {
       randomSpy.mockRestore();
       randomSpy = null;
@@ -37,15 +37,15 @@ describe('ChatManager', () => {
   
   describe('createEmptyChatForUser', () => {
     test('should create an empty chat with the user as participant', () => {
-      // Einen einzelnen Spy verwenden
+
       randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.12345);
       
       const userId = 'user123';
       const chatId = createEmptyChatForUser(userId);
       
-      expect(chatId).toBe('21110'); // 10000 + 0.12345 * 90000 = ~21110, gerundet
+      expect(chatId).toBe('21110'); // 10000 + 0.12345 * 90000 = ~21110
       
-      // Prüfe Verhalten, nicht interne Implementierung
+      
       const userChats = getUserChats(userId);
       expect(userChats.length).toBe(1);
       expect(userChats[0].chatId).toBe(chatId);
@@ -54,10 +54,10 @@ describe('ChatManager', () => {
     });
     
     test('should generate unique chat IDs for different calls', () => {
-      // Simuliere unterschiedliche Zufallswerte
+      
       randomSpy = vi.spyOn(Math, 'random')
-        .mockReturnValueOnce(0.1)  // Für ersten Aufruf
-        .mockReturnValueOnce(0.2); // Für zweiten Aufruf
+        .mockReturnValueOnce(0.1)  
+        .mockReturnValueOnce(0.2); 
         
       const userId = 'user123';
       const chatId1 = createEmptyChatForUser(userId);
@@ -88,14 +88,14 @@ describe('ChatManager', () => {
       const userId1 = 'user123';
       const userId2 = 'user456';
       
-      // Erst Chat für user1 erstellen
+      
       const chatId = createEmptyChatForUser(userId1);
       
-      // user2 beitreten lassen
+      
       const result = joinChatById(chatId, userId2);
       expect(result).toBe(true);
       
-      // Prüfen, ob beide Nutzer im Chat sind
+      
       const chat = getChat(chatId);
       const participantIds = chat.participants.map(p => p.id);
       
@@ -123,7 +123,7 @@ describe('ChatManager', () => {
       expect(message.from).toBe(userId);
       expect(message.text).toBe(messageText);
       
-      // Prüfen, ob die Nachricht im Chat sichtbar ist
+      
       const chat = getChat(chatId);
       expect(chat.messages.length).toBe(1);
       expect(chat.messages[0].id).toBe('mock-uuid-123');
@@ -136,7 +136,7 @@ describe('ChatManager', () => {
       const chatId1 = createEmptyChatForUser(userId);
       const chatId2 = createAIChatForUser(userId);
       
-      // Ein Chat, in dem der User nicht ist
+      
       const otherUserId = 'otherUser';
       createEmptyChatForUser(otherUserId);
       
@@ -159,10 +159,10 @@ describe('ChatManager', () => {
       const userId = 'user123';
       const chatId = createEmptyChatForUser(userId);
       
-      // Nachricht hinzufügen
+      
       addMessageToChat(chatId, userId, 'Hello');
       
-      // Chat abrufen
+      
       const chat = getChat(chatId);
       
       expect(chat.id).toBe(chatId);
@@ -176,16 +176,16 @@ describe('ChatManager', () => {
       const userId = 'user123';
       const chatId = createEmptyChatForUser(userId);
       
-      // 10 Nachrichten hinzufügen
+      
       for (let i = 0; i < 10; i++) {
         addMessageToChat(chatId, userId, `Message ${i}`);
       }
       
-      // Nur die letzten 5 Nachrichten abrufen
+      
       const chat = getChat(chatId, 5);
       
       expect(chat.messages.length).toBe(5);
-      // Prüfe, ob es die letzten 5 Nachrichten sind
+      
       expect(chat.messages[0].text).toBe('Message 5');
       expect(chat.messages[4].text).toBe('Message 9');
     });

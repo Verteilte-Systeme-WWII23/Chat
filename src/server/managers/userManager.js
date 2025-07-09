@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 
 const users = new Map();
 users.set("AI", null);
-/*
+/* Structure for every user
 {
   ws:  WebSocket-Objekt,
   name: "Gast_ab12" oder ein gesetzter Name
@@ -51,6 +51,7 @@ export function banIp(ip) {
   for (const [id, user] of users.entries()) {
     if (!user) continue;
     if (user.ip === ip) {
+      // Close the WebSocket connection for the banned user and remove it, so no further messages can be sent
       user.ws.close();
       user.ws = null;
     }

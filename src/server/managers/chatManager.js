@@ -6,6 +6,8 @@ const messages = new Map();
 
 function generateNumericChatId() {
   let id;
+  // Generate a random numeric ID between 10000 and 99999
+  // -> not a UUID because this must be enterd by a User to join the chat  
   do {
     id = Math.floor(10000 + Math.random() * 90000).toString();
   } while (chats.has(id));
@@ -25,6 +27,7 @@ export function createEmptyChatForUser(userId) {
 
 export function createAIChatForUser(userId) {
   const chatId = generateNumericChatId();
+  // Every AI chat must have the AI participant which userId is always "AI"
   chats.set(chatId, {
     id: chatId,
     participants: [userId, "AI"],
@@ -55,7 +58,7 @@ export function addMessageToChat(chatId, fromUserId, text) {
   messages.get(chatId).push(message);
   return message;
 }
-
+// Get all Chats of a user
 export function getUserChats(userId) {
   const userChats = [];
   for (const [chatId, chat] of chats.entries()) {

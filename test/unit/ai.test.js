@@ -26,8 +26,6 @@ describe('getAIResponse', () => {
     const errorMessage = 'Entschuldigung, ich konnte keine Antwort generieren.';
     getAIResponse.mockRejectedValue(new Error('API Error'));
     
-    // Da wir die Implementierung mocken, können wir keine echten Fehler testen
-    // Stattdessen testen wir das Verhalten bei Fehlern durch einen zweiten Mock
     getAIResponse.mockImplementation(async () => {
       throw new Error('API Error');
     }).mockResolvedValueOnce(errorMessage);

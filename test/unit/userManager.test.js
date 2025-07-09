@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, vi } from 'vitest';
 import * as userManager from '../../src/server/managers/userManager.js';
 import { v4 as uuidv4 } from 'uuid';
 
-// Mock uuid to return predictable values
+
 vi.mock('uuid', () => ({
     v4: vi.fn()
 }));
@@ -11,20 +11,20 @@ describe('User Manager', () => {
     let mockWs;
     
     beforeEach(() => {
-        // Reset mocks and clear users between tests
+
         vi.clearAllMocks();
         mockWs = {
             close: vi.fn(),
             send: vi.fn()
         };
         
-        // Clear existing users (except AI)
+
         const users = userManager.getAllUsers();
         for (const userId of users.keys()) {
             if (userId !== 'AI') userManager.removeUser(userId);
         }
         
-        // Clear banned IPs
+
         const bannedIps = userManager.getBannedIps();
         bannedIps.forEach(ip => userManager.unBanIp(ip));
     });

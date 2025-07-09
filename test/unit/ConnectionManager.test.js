@@ -18,12 +18,12 @@ describe('ConnectionManager Tests', () => {
   let mockReq;
 
   beforeEach(() => {
-    // WebSocket-Mock
+    
     mockWs = {
       send: vi.fn()
     };
 
-    // Request-Mock mit verschiedenen IP-Quellen
+    
     mockReq = {
       headers: {
         'x-forwarded-for': '192.168.1.1,10.0.0.1',
@@ -37,7 +37,7 @@ describe('ConnectionManager Tests', () => {
       }
     };
 
-    // Mock-Reset
+    
     vi.clearAllMocks();
   });
 
@@ -87,13 +87,13 @@ describe('ConnectionManager Tests', () => {
         ws: null
       };
       
-      // Mock-Konfiguration
+    
       getUser.mockImplementation((id) => id === userId ? userData : null);
       
-      // Test durchführen
+    
       const result = ConnectionManager.handleReconnect(mockWs, { userId });
       
-      // Erwartungen überprüfen
+    
       expect(result).toBe(userId);
       expect(userData.ws).toBe(mockWs);
       expect(mockWs.send).toHaveBeenCalledWith(expect.stringContaining('welcome'));
@@ -122,14 +122,14 @@ describe('ConnectionManager Tests', () => {
         ws: mockWs
       };
       
-      // Mock-Konfiguration
+    
       addUser.mockReturnValue(userId);
       getUser.mockImplementation((id) => id === userId ? userData : null);
       
-      // Test durchführen
+    
       const result = ConnectionManager.initializeNewUser(mockWs, '192.168.1.1');
       
-      // Erwartungen überprüfen
+    
       expect(result).toBe(userId);
       expect(addUser).toHaveBeenCalledWith(mockWs, '192.168.1.1');
       expect(createAIChatForUser).toHaveBeenCalledWith(userId);
@@ -139,7 +139,7 @@ describe('ConnectionManager Tests', () => {
 
   describe('executeCommand', () => {
     test('sollte Befehl erfolgreich ausführen', async () => {
-      // Mock-Handler und Commands
+    
       const mockHandler = {
         testCommand: vi.fn(),
         sendError: vi.fn()
@@ -149,19 +149,19 @@ describe('ConnectionManager Tests', () => {
         ['testCommand', 'testCommand']
       ]);
       
-      // Test-Daten
+    
       const data = { param1: 'value1' };
       
-      // Test durchführen
+    
       await ConnectionManager.executeCommand(mockHandler, 'testCommand', data, mockCommands);
       
-      // Erwartungen überprüfen
+    
       expect(mockHandler.testCommand).toHaveBeenCalledWith(data);
       expect(mockHandler.sendError).not.toHaveBeenCalled();
     });
 
     test('sollte Fehler senden, wenn Befehl nicht existiert', async () => {
-      // Mock-Handler und Commands
+    
       const mockHandler = {
         testCommand: vi.fn(),
         sendError: vi.fn()
@@ -171,19 +171,19 @@ describe('ConnectionManager Tests', () => {
         ['testCommand', 'testCommand']
       ]);
       
-      // Test-Daten
+    
       const data = { param1: 'value1' };
       
-      // Test durchführen
+    
       await ConnectionManager.executeCommand(mockHandler, 'unknownCommand', data, mockCommands);
       
-      // Erwartungen überprüfen
+    
       expect(mockHandler.testCommand).not.toHaveBeenCalled();
       expect(mockHandler.sendError).toHaveBeenCalledWith(expect.stringContaining('Unbekannter Command'));
     });
 
     test('sollte Fehler senden, wenn Befehlsmethode nicht existiert', async () => {
-      // Mock-Handler und Commands mit ungültigem Methodennamen
+    
       const mockHandler = {
         existingMethod: vi.fn(),
         sendError: vi.fn()
@@ -193,10 +193,10 @@ describe('ConnectionManager Tests', () => {
         ['validCommand', 'nonExistentMethod']
       ]);
       
-      // Test durchführen
+    
       await ConnectionManager.executeCommand(mockHandler, 'validCommand', {}, mockCommands);
       
-      // Erwartungen überprüfen
+    
       expect(mockHandler.existingMethod).not.toHaveBeenCalled();
       expect(mockHandler.sendError).toHaveBeenCalledWith(expect.stringContaining('Unbekannter Command'));
     });

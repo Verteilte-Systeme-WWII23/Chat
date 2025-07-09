@@ -5,11 +5,9 @@ import { validateIP } from '../middleware/validation.js';
 
 const router = express.Router();
 
-// Middleware für alle Routes
 router.use(express.json());
 router.use(adminAuth);
 
-// Get all users
 router.post("/users", async (req, res) => {
   try {
     const users = [];
@@ -25,7 +23,6 @@ router.post("/users", async (req, res) => {
   }
 });
 
-// Get banned IPs
 router.post("/banned-ips", async (req, res) => {
   try {
     const bannedUserIps = [];
@@ -45,7 +42,6 @@ router.post("/banned-ips", async (req, res) => {
   }
 });
 
-// Ban IP - mit Validierung
 router.post("/ban/ip", validateIP, async (req, res) => {
   try {
     const { ip } = req.body;
@@ -57,7 +53,7 @@ router.post("/ban/ip", validateIP, async (req, res) => {
   }
 });
 
-// Unban IP - mit Validierung
+
 router.post("/unban/ip", validateIP, async (req, res) => {
   try {
     const { ip } = req.body;

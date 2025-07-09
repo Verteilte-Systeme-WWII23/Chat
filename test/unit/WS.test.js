@@ -13,7 +13,7 @@ import {
 } from '../../src/server/managers/chatManager.js';
 import { getAIResponse } from '../../src/server/managers/ai.js';
 
-// Mocks für alle externen Abhängigkeiten
+
 vi.mock('../../src/server/managers/userManager.js', () => ({
   setUserName: vi.fn(),
   getUser: vi.fn()
@@ -37,19 +37,19 @@ describe('WS Klasse Tests', () => {
   let mockWebSocket;
 
   beforeEach(() => {
-    // WebSocket-Mock erstellen
+
     mockWebSocket = {
-      readyState: 1, // OPEN
+      readyState: 1,
       send: vi.fn()
     };
 
     userId = 'user-123';
     ws = new WS(mockWebSocket, userId);
 
-    // Alle Mocks zurücksetzen
+    
     vi.clearAllMocks();
 
-    // Standard-Rückgabewerte für Mocks festlegen
+    
     getUser.mockImplementation((id) => {
       if (id === 'user-123') {
         return { name: 'TestUser', ws: mockWebSocket };
@@ -107,7 +107,7 @@ describe('WS Klasse Tests', () => {
     });
 
     test('sollte keine Daten senden, wenn WebSocket nicht geöffnet ist', () => {
-      mockWebSocket.readyState = 3; // CLOSED
+      mockWebSocket.readyState = 3; 
       
       const data = { type: 'test', message: 'Hallo Welt' };
       ws.send(data);
@@ -128,7 +128,7 @@ describe('WS Klasse Tests', () => {
       const result = ws.broadcastToChat('chat-123', data);
       
       expect(result).toBe(true);
-      expect(mockWebSocket.send).toHaveBeenCalledTimes(2); // Beide Teilnehmer
+      expect(mockWebSocket.send).toHaveBeenCalledTimes(2);
     });
 
     test('sollte angegebene Benutzer bei Broadcast ausschließen', () => {
@@ -136,7 +136,7 @@ describe('WS Klasse Tests', () => {
       const result = ws.broadcastToChat('chat-123', data, 'user-123');
       
       expect(result).toBe(true);
-      expect(mockWebSocket.send).toHaveBeenCalledTimes(1); // Nur ein Teilnehmer
+      expect(mockWebSocket.send).toHaveBeenCalledTimes(1);
     });
 
     test('sollte false zurückgeben, wenn Chat nicht existiert', () => {
@@ -203,7 +203,7 @@ describe('WS Klasse Tests', () => {
       await ws.messageTo({ chatId: 'chat-123', text: 'Test Nachricht' });
       
       expect(addMessageToChat).toHaveBeenCalledWith('chat-123', 'user-123', 'Test Nachricht');
-      expect(mockWebSocket.send).toHaveBeenCalledTimes(2); // Broadcast an beide Teilnehmer
+      expect(mockWebSocket.send).toHaveBeenCalledTimes(2);
     });
 
     test('sollte Fehler senden, wenn Nachricht leer ist', async () => {
@@ -233,10 +233,10 @@ describe('WS Klasse Tests', () => {
       await ws.messageTo({ chatId: 'ai-chat', text: 'Hallo AI' });
       
       expect(getAIResponse).toHaveBeenCalledWith('Hallo AI');
-      expect(addMessageToChat).toHaveBeenCalledTimes(2); // Benutzernachricht und AI-Antwort
+      expect(addMessageToChat).toHaveBeenCalledTimes(2); 
       
-      // Korrigierte Erwartung: 2 statt 4 Aufrufe
-      expect(mockWebSocket.send).toHaveBeenCalledTimes(2); // Nur der menschliche Teilnehmer erhält beide Nachrichten
+      
+      expect(mockWebSocket.send).toHaveBeenCalledTimes(2);
     });
 
     test('sollte Fehler bei AI-Antwort behandeln', async () => {
@@ -249,7 +249,7 @@ describe('WS Klasse Tests', () => {
       
       getAIResponse.mockRejectedValue(new Error('AI-Fehler'));
       
-      // Spionieren auf console.error
+      
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       
       await ws.messageTo({ chatId: 'ai-chat', text: 'Hallo AI' });
@@ -257,7 +257,7 @@ describe('WS Klasse Tests', () => {
       expect(getAIResponse).toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith('AI Response Error:', expect.any(Error));
       
-      // Spionage aufheben
+      
       consoleSpy.mockRestore();
     });
 

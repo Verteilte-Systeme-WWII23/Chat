@@ -18,19 +18,16 @@ export function handleConnection(ws, req) {
     try {
       const data = JSON.parse(msg);
 
-      // Reconnect-Handling
       if (data.type === "reconnect") {
         userId = ConnectionManager.handleReconnect(ws, data);
         return;
       }
 
-      // User-Initialisierung
       if (!userId) {
         userId = ConnectionManager.initializeNewUser(ws, ip);
         return;
       }
 
-      // Command ausführen
       const handler = new WS(ws, userId);
       await ConnectionManager.executeCommand(handler, data.type, data, COMMANDS);
 
